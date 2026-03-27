@@ -297,7 +297,7 @@ export default function App() {
         <div className="flex items-center gap-8">
           <button 
             onClick={() => setIsSidebarOpen(!isSidebarOpen)}
-            className="lg:hidden p-3 hover:bg-stone-50 rounded-2xl transition-all active:scale-95 text-stone-400 hover:text-stone-900"
+            className="p-3 hover:bg-stone-50 rounded-2xl transition-all active:scale-95 text-stone-400 hover:text-stone-900"
           >
             <Menu size={24} />
           </button>
@@ -391,14 +391,22 @@ export default function App() {
         {/* Sidebar */}
         <aside 
           className={`
-            fixed lg:relative inset-y-0 left-0 w-72 bg-white border-r border-stone-100 z-[60] lg:z-0
+            fixed inset-y-0 left-0 w-72 bg-white border-r border-stone-100 z-[60]
             transform transition-transform duration-300 ease-in-out flex flex-col
-            ${isSidebarOpen ? 'translate-x-0' : '-translate-x-full lg:translate-x-0'}
+            ${isSidebarOpen ? 'translate-x-0 shadow-2xl' : '-translate-x-full'}
             no-print
           `}
         >
+          <div className="flex items-center justify-between p-6 pb-0">
+            <p className="text-[10px] font-black text-stone-400 uppercase tracking-[0.2em]">Menu Principal</p>
+            <button 
+              onClick={() => setIsSidebarOpen(false)}
+              className="p-2 hover:bg-stone-50 rounded-xl text-stone-400"
+            >
+              <Plus size={24} className="rotate-45" />
+            </button>
+          </div>
           <div className="flex-1 py-10 px-6 space-y-3">
-             <p className="text-[10px] font-black text-stone-400 uppercase tracking-[0.2em] mb-6 px-4">Menu Principal</p>
             <SidebarItem 
               icon={<PlusCircle size={22} />} 
               label="Novo Cadastro" 
@@ -892,6 +900,7 @@ function CadastroView({
 }) {
   const sigCanvas = useRef<SignatureCanvas>(null);
   const [isScannerActive, setScannerActive] = useState(false);
+  const [isSignatureModalActive, setIsSignatureModalActive] = useState(false);
 
   // Fix for signature canvas resizing
   useEffect(() => {
@@ -1062,65 +1071,66 @@ function CadastroView({
             </div>
           </div>
 
-          <div className="p-8 space-y-8">
-            <div className="space-y-3">
-              {/* List Header */}
+          <div className="p-8 space-y-6">
+            <div className="space-y-4">
+              {/* List Header (Desktop Only) */}
               {data.nfs.length > 0 && (
-                <div className="grid grid-cols-1 sm:grid-cols-2 gap-6 pr-12 px-4 hidden sm:grid">
+                <div className="hidden sm:grid grid-cols-2 gap-6 pr-12 px-4">
                   <span className="text-[10px] font-black text-stone-400 uppercase tracking-widest">Nº da NF</span>
                   <span className="text-[10px] font-black text-stone-400 uppercase tracking-widest">ID Expedição</span>
                 </div>
               )}
 
               {data.nfs.map((nf: any) => (
-                <div key={nf.id} className="flex items-center gap-4 group">
-                  <div className="flex-1 grid grid-cols-1 sm:grid-cols-2 gap-4 bg-stone-50/50 p-3 rounded-2xl border border-stone-100 group-hover:border-stone-200 transition-all">
-                    <div className="sm:hidden">
-                      <InputField label="Nº da NF" value={nf.numero} onChange={(v) => updateNF(nf.id, 'numero', v)} />
-                    </div>
-                    <div className="hidden sm:block">
-                      <input
-                        type="text"
-                        value={nf.numero}
-                        placeholder="000.000.000"
-                        onChange={(e) => updateNF(nf.id, 'numero', e.target.value)}
-                        className={`w-full bg-white border rounded-xl py-2.5 px-4 text-xs focus:ring-2 focus:ring-stone-900 transition-all shadow-sm ${
-                          nf.numero.trim() === '' ? 'border-amber-200 bg-amber-50/30' : 'border-stone-200'
-                        }`}
-                      />
+                <div key={nf.id} className="group relative">
+                  {/* Item Row/Card */}
+                  <div className="flex flex-col sm:flex-row items-stretch sm:items-center gap-4 bg-stone-50/50 p-4 sm:p-3 rounded-2xl border border-stone-100 group-hover:border-stone-200 transition-all">
+                    {/* Mobile Labels are handled inside InputField or shown only on mobile */}
+                    <div className="flex-1 space-y-4 sm:space-y-0 sm:grid sm:grid-cols-2 sm:gap-4">
+                      <div className="sm:hidden">
+                         <InputField label="Nº da NF" value={nf.numero} onChange={(v) => updateNF(nf.id, 'numero', v)} placeholder="000.000.000" />
+                      </div>
+                      <div className="hidden sm:block">
+                        <input
+                          type="text"
+                          value={nf.numero}
+                          placeholder="Nº da NF"
+                          onChange={(e) => updateNF(nf.id, 'numero', e.target.value)}
+                          className="w-full bg-white border border-stone-200 rounded-xl py-2.5 px-4 text-xs focus:ring-2 focus:ring-stone-900 transition-all shadow-sm"
+                        />
+                      </div>
+
+                      <div className="sm:hidden">
+                         <InputField label="ID Expedição" value={nf.expedicaoId} onChange={(v) => updateNF(nf.id, 'expedicaoId', v)} placeholder="EXP-0000" />
+                      </div>
+                      <div className="hidden sm:block">
+                        <input
+                          type="text"
+                          value={nf.expedicaoId}
+                          placeholder="ID Expedição"
+                          onChange={(e) => updateNF(nf.id, 'expedicaoId', e.target.value)}
+                          className="w-full bg-white border border-stone-200 rounded-xl py-2.5 px-4 text-xs focus:ring-2 focus:ring-stone-900 transition-all shadow-sm"
+                        />
+                      </div>
                     </div>
 
-                    <div className="sm:hidden">
-                      <InputField label="ID Expedição" value={nf.expedicaoId} onChange={(v) => updateNF(nf.id, 'expedicaoId', v)} />
-                    </div>
-                    <div className="hidden sm:block">
-                      <input
-                        type="text"
-                        value={nf.expedicaoId}
-                        placeholder="EXP-0000"
-                        onChange={(e) => updateNF(nf.id, 'expedicaoId', e.target.value)}
-                        className={`w-full bg-white border rounded-xl py-2.5 px-4 text-xs focus:ring-2 focus:ring-stone-900 transition-all shadow-sm ${
-                          nf.expedicaoId.trim() === '' ? 'border-amber-200 bg-amber-50/30' : 'border-stone-200'
-                        }`}
-                      />
-                    </div>
+                    <button 
+                      onClick={() => removeNF(nf.id)}
+                      className="p-3 bg-red-50 text-red-500 rounded-xl sm:rounded-lg opacity-100 sm:opacity-0 group-hover:opacity-100 transition-all hover:bg-red-500 hover:text-white flex items-center justify-center"
+                      title="Remover Nota"
+                    >
+                      <Trash2 size={16} />
+                    </button>
                   </div>
-                  <button 
-                    onClick={() => removeNF(nf.id)}
-                    className="bg-white text-stone-300 hover:text-red-500 p-3 rounded-xl shadow-sm border border-stone-100 hover:border-red-100 transition-all"
-                    title="Remover NF"
-                  >
-                    <Trash2 size={18} />
-                  </button>
                 </div>
               ))}
-
-              {data.nfs.length === 0 && (
-                <div className="py-12 text-center border-2 border-dashed border-stone-100 rounded-[2rem] text-stone-300 font-bold text-sm uppercase tracking-widest bg-stone-50/30">
-                  Nenhuma Nota Fiscal adicionada
-                </div>
-              )}
             </div>
+            
+            {data.nfs.length === 0 && (
+              <div className="text-center py-10 bg-stone-50/50 rounded-3xl border border-dashed border-stone-200">
+                <p className="text-[10px] font-black text-stone-300 uppercase tracking-widest">Nenhuma nota adicionada</p>
+              </div>
+            )}
           </div>
         </div>
 
@@ -1160,31 +1170,42 @@ function CadastroView({
           </div>
         </div>
 
-        {/* Card: Coleta de Assinatura */}
+        {/* Card: Assinatura */}
         <div className="md:col-span-2 bg-white rounded-[2rem] shadow-sm border border-stone-100 overflow-hidden">
           <div className="bg-stone-900 p-6 flex items-center justify-between text-white">
             <div className="flex items-center gap-4">
               <div className="p-2.5 bg-white/10 rounded-xl">
                 <PenTool size={22} />
               </div>
-              <h2 className="text-base font-black uppercase tracking-tighter">Coleta de Assinatura</h2>
+              <h2 className="text-base font-black uppercase tracking-tighter">Assinatura Digital</h2>
             </div>
             <button 
-              onClick={clearSignature}
-              className="flex items-center gap-2 text-white/60 hover:text-white transition-colors text-[10px] font-black uppercase tracking-widest"
+              onClick={() => signatureRef.current?.clear()}
+              className="p-2.5 bg-white/10 hover:bg-white/20 rounded-xl transition-all"
+              title="Limpar assinatura"
             >
-              <Eraser size={14} /> Limpar Assinatura
+              <Trash2 size={18} />
             </button>
           </div>
+          
+          <div className="p-8">
+             <div className="sm:hidden mb-6">
+                <button 
+                  onClick={() => setIsSignatureModalActive(true)}
+                  className="w-full bg-blue-50 text-[#003366] py-16 rounded-[2rem] border-2 border-dashed border-blue-200 flex flex-col items-center justify-center gap-4 hover:bg-blue-100 transition-all"
+                >
+                  <div className="p-4 bg-white rounded-2xl shadow-sm">
+                    <PenTool size={32} />
+                  </div>
+                  <p className="text-xs font-black uppercase tracking-widest text-[#003366]">Clique para assinar</p>
+                  <p className="text-[10px] font-bold text-blue-400 uppercase tracking-tighter">(Abre em tela cheia)</p>
+                </button>
+             </div>
 
-          <div className="p-8 space-y-8">
-            <div className="border-2 border-dashed border-stone-200 rounded-3xl overflow-hidden bg-stone-50 h-48 relative touch-none">
+            <div className={`hidden sm:block border-2 border-dashed border-stone-200 rounded-[2rem] bg-stone-50/30 transition-all hover:border-stone-300 relative`}>
               <SignatureCanvas 
-                ref={sigCanvas}
+                ref={signatureRef}
                 penColor="black"
-                velocityFilterWeight={0.7}
-                minWidth={1.5}
-                maxWidth={3.5}
                 canvasProps={{ 
                   className: 'w-full h-full cursor-crosshair',
                   style: { display: 'block' }
@@ -1275,7 +1296,6 @@ function CadastroView({
           {isScannerActive && (
             <ScannerModal 
               onScan={(decodedText) => {
-                // Processar Chave de Acesso NF-e (44 dígitos)
                 if (decodedText.length >= 34) {
                   const nfNumero = decodedText.substring(25, 34);
                   const newNF: NFItem = {
@@ -1290,6 +1310,19 @@ function CadastroView({
                 }
               }}
               onClose={() => setScannerActive(false)}
+            />
+          )}
+        </AnimatePresence>
+
+        {/* Signature Modal */}
+        <AnimatePresence>
+          {isSignatureModalActive && (
+            <SignatureFullscreenModal 
+              onSave={(image) => {
+                setData((prev: any) => ({ ...prev, signatureImage: image }));
+                setIsSignatureModalActive(false);
+              }}
+              onClose={() => setIsSignatureModalActive(false)}
             />
           )}
         </AnimatePresence>
@@ -1433,94 +1466,150 @@ function ConsultaView({
 
 function ScannerModal({ onScan, onClose }: { onScan: (text: string) => void, onClose: () => void }) {
   const [lastScanned, setLastScanned] = useState<string | null>(null);
+  const [isFlashActive, setIsFlashActive] = useState(false);
+  const scannerRef = useRef<Html5Qrcode | null>(null);
   
   useEffect(() => {
-    const html5QrCode = new Html5QrcodeScanner("reader", { 
-      fps: 10, 
-      qrbox: { width: 300, height: 100 },
-      aspectRatio: 1.0,
-      showTorchButtonIfSupported: true,
-      showZoomSliderIfSupported: true
-    }, false);
-    
-    html5QrCode.render((decodedText) => {
-      onScan(decodedText);
-      setLastScanned(decodedText.substring(25, 34) || decodedText);
-      // Feedback visual rápido
-      setTimeout(() => setLastScanned(null), 2000);
-    }, () => {});
+    const html5QrCode = new Html5Qrcode("reader");
+    scannerRef.current = html5QrCode;
+
+    const config = { fps: 10, qrbox: { width: 280, height: 100 } };
+
+    html5QrCode.start(
+      { facingMode: "environment" }, 
+      config, 
+      (decodedText) => {
+        onScan(decodedText);
+        setLastScanned(decodedText.substring(25, 34) || decodedText);
+        setIsFlashActive(true);
+        setTimeout(() => setIsFlashActive(false), 150);
+        setTimeout(() => setLastScanned(null), 1500);
+      },
+      () => {}
+    ).catch(err => console.error("Error starting scanner:", err));
 
     return () => {
-      html5QrCode.clear().catch(e => console.error("Failed to clear scanner", e));
+      if (scannerRef.current?.isScanning) {
+        scannerRef.current.stop().catch(e => console.error("Error stopping scanner:", e));
+      }
     };
   }, []);
 
   return (
-    <div className="fixed inset-0 z-[200] flex items-center justify-center bg-stone-900/90 backdrop-blur-md p-4">
-      <motion.div 
-        initial={{ opacity: 0, scale: 0.9 }}
-        animate={{ opacity: 1, scale: 1 }}
-        exit={{ opacity: 0, scale: 0.9 }}
-        className="bg-white rounded-[2.5rem] w-full max-w-lg overflow-hidden relative shadow-2xl"
-      >
-        <div className="bg-stone-900 p-8 text-white flex items-center justify-between">
-          <div className="flex items-center gap-4">
-            <div className="p-3 bg-white/10 rounded-2xl">
-              <Camera size={24} />
-            </div>
-            <div>
-              <h2 className="text-xl font-black uppercase tracking-tighter">Scanner Ativo</h2>
-              <p className="text-stone-400 text-[10px] font-bold uppercase tracking-widest mt-1">Leitura Automática e Contínua</p>
-            </div>
-          </div>
-          <button 
-            onClick={onClose}
-            className="p-3 bg-white/10 hover:bg-white/20 rounded-2xl transition-all"
-          >
-            <Plus size={24} className="rotate-45" />
-          </button>
-        </div>
-        
-        <div className="p-8 text-center text-stone-900">
-          <div id="reader" className="w-full rounded-2xl overflow-hidden border-2 border-stone-100 bg-stone-50 min-h-[300px] flex items-center justify-center relative">
-            {lastScanned && (
-              <motion.div 
-                initial={{ opacity: 0, y: 20 }}
-                animate={{ opacity: 1, y: 0 }}
-                className="absolute inset-x-8 top-1/2 -translate-y-1/2 z-10 bg-emerald-500 text-white p-6 rounded-3xl shadow-2xl border-4 border-white flex flex-col items-center gap-2"
-              >
-                <PlusCircle size={32} />
-                <p className="text-xs font-black uppercase tracking-widest">NF {lastScanned} Lida!</p>
-              </motion.div>
-            )}
-          </div>
-          
-          <div className="mt-8">
-            <div className="flex items-start gap-4 p-5 bg-blue-50/50 rounded-2xl border border-blue-100 text-left">
-              <div className="p-2 bg-[#003366] rounded-xl text-white mt-1">
-                <FileText size={18} />
-              </div>
-              <div>
-                <p className="text-[10px] font-black text-stone-900 leading-relaxed uppercase tracking-tight mb-1">
-                  Múltiplas Leituras
-                </p>
-                <p className="text-[9px] font-bold text-stone-400 leading-relaxed uppercase tracking-tight">
-                  Continue apontando para outras notas para adicioná-las em sequência.
-                </p>
-              </div>
-            </div>
+    <div className="fixed inset-0 z-[250] bg-black flex flex-col no-print">
+      {/* Immersive Camera View */}
+      <div id="reader" className="flex-1 w-full bg-black relative overflow-hidden">
+        {/* Viewfinder Overlay */}
+        <div className="absolute inset-0 z-10 pointer-events-none flex items-center justify-center">
+          <div className="w-[300px] h-[150px] border-2 border-white/30 rounded-3xl relative">
+            {/* Corners */}
+            <div className="absolute -top-1 -left-1 w-8 h-8 border-t-4 border-l-4 border-white rounded-tl-xl" />
+            <div className="absolute -top-1 -right-1 w-8 h-8 border-t-4 border-r-4 border-white rounded-tr-xl" />
+            <div className="absolute -bottom-1 -left-1 w-8 h-8 border-b-4 border-l-4 border-white rounded-bl-xl" />
+            <div className="absolute -bottom-1 -right-1 w-8 h-8 border-b-4 border-r-4 border-white rounded-br-xl" />
+            
+            {/* Scanning Laser */}
+            <motion.div 
+              animate={{ top: ['10%', '90%'] }}
+              transition={{ repeat: Infinity, duration: 2, ease: "linear" }}
+              className="absolute inset-x-4 h-0.5 bg-red-500 shadow-[0_0_15px_rgba(239,68,68,0.8)]"
+            />
           </div>
         </div>
 
-        <div className="px-8 pb-10">
-          <button 
-            onClick={onClose}
-            className="w-full bg-stone-900 text-white py-5 rounded-3xl font-black uppercase tracking-widest hover:bg-stone-800 transition-all shadow-xl shadow-stone-200 flex items-center justify-center gap-3"
-          >
-            Concluir Leituras
-          </button>
+        {/* Flash Effect */}
+        <AnimatePresence>
+          {isFlashActive && (
+            <motion.div 
+              initial={{ opacity: 0 }}
+              animate={{ opacity: 1 }}
+              exit={{ opacity: 0 }}
+              className="absolute inset-0 z-20 bg-white"
+            />
+          )}
+        </AnimatePresence>
+
+        {/* Scan Feedback */}
+        <AnimatePresence>
+          {lastScanned && (
+            <motion.div 
+              initial={{ opacity: 0, scale: 0.8, y: 20 }}
+              animate={{ opacity: 1, scale: 1, y: 0 }}
+              exit={{ opacity: 0, scale: 0.8 }}
+              className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 z-30 bg-emerald-500 text-white px-8 py-4 rounded-3xl shadow-2xl flex flex-col items-center gap-2 border-4 border-white"
+            >
+              <PlusCircle size={32} />
+              <p className="text-sm font-black uppercase tracking-widest">NF {lastScanned} Lida!</p>
+            </motion.div>
+          )}
+        </AnimatePresence>
+      </div>
+
+      {/* Modern Control Bar */}
+      <div className="h-40 bg-stone-900 px-8 flex items-center justify-between text-white relative">
+        <div className="flex flex-col gap-1">
+          <h2 className="text-xl font-black uppercase tracking-tighter">Scanner de Notas</h2>
+          <p className="text-stone-400 text-[10px] font-bold uppercase tracking-widest">Aponte para o código de barras</p>
         </div>
-      </motion.div>
+        
+        <button 
+          onClick={onClose}
+          className="bg-white/10 hover:bg-white/20 p-5 rounded-3xl transition-all shadow-xl backdrop-blur-md font-black uppercase tracking-widest text-sm flex items-center gap-3"
+        >
+          Concluir <Plus size={20} className="rotate-45" />
+        </button>
+      </div>
+    </div>
+  );
+}
+
+function SignatureFullscreenModal({ onSave, onClose }: { onSave: (img: string) => void, onClose: () => void }) {
+  const modalCanvasRef = useRef<SignatureCanvas>(null);
+
+  const handleDone = () => {
+    if (modalCanvasRef.current && !modalCanvasRef.current.isEmpty()) {
+      onSave(modalCanvasRef.current.toDataURL('image/png'));
+    }
+  };
+
+  return (
+    <div className="fixed inset-0 z-[300] bg-white flex flex-col no-print">
+      <div className="h-20 bg-stone-900 text-white flex items-center justify-between px-8">
+        <p className="text-xs font-black uppercase tracking-[0.2em]">Assinatura em Tela Cheia</p>
+        <button onClick={onClose} className="p-2 bg-white/10 rounded-xl"><Plus size={24} className="rotate-45" /></button>
+      </div>
+      
+      <div className="flex-1 bg-stone-50 relative overflow-hidden flex items-center justify-center">
+        {/* Instructional background text */}
+        <div className="absolute inset-0 flex items-center justify-center pointer-events-none opacity-5 rotate-90 sm:rotate-0">
+          <h2 className="text-6xl font-black uppercase tracking-[0.5em] text-center">Assine Aqui</h2>
+        </div>
+        
+        <div className="w-full h-full p-4">
+          <SignatureCanvas 
+            ref={modalCanvasRef}
+            penColor="black"
+            canvasProps={{ 
+              className: "w-full h-full bg-white rounded-3xl shadow-inner border-2 border-stone-100",
+            }}
+          />
+        </div>
+      </div>
+
+      <div className="p-8 bg-white border-t border-stone-100 flex gap-4">
+        <button 
+          onClick={() => modalCanvasRef.current?.clear()}
+          className="flex-1 py-5 rounded-3xl border-2 border-stone-200 text-stone-400 font-black uppercase tracking-widest text-xs hover:bg-stone-50 transition-all"
+        >
+          Limpar
+        </button>
+        <button 
+          onClick={handleDone}
+          className="flex-[2] py-5 rounded-3xl bg-[#003366] text-white font-black uppercase tracking-widest text-xs hover:shadow-xl hover:shadow-blue-100 transition-all active:scale-95"
+        >
+          Confirmar Assinatura
+        </button>
+      </div>
     </div>
   );
 }
