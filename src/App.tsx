@@ -299,15 +299,16 @@ export default function App() {
             onClick={() => setIsSidebarOpen(!isSidebarOpen)}
             className="p-3 hover:bg-stone-50 rounded-2xl transition-all active:scale-95 text-stone-400 hover:text-stone-900"
           >
+            {/* Toggle icon based on state if needed, or keep Menu */}
             <Menu size={24} />
           </button>
           
-          <div className="flex items-center gap-8">
-            <div className="text-stone-900 transition-transform hover:scale-105 cursor-pointer">
-              <BrandLogo size="md" className="brightness-0" />
+          <div className="flex items-center gap-6">
+            <div className="text-stone-900 transition-transform hover:scale-105 cursor-pointer flex items-center justify-center">
+              <BrandLogo size="sm" className="brightness-0" />
             </div>
             <div className="w-[1px] h-8 bg-stone-200 hidden lg:block" />
-            <h2 className="text-lg lg:text-xl font-black tracking-tighter uppercase hidden sm:block">
+            <h2 className="text-base lg:text-lg font-black tracking-tighter uppercase hidden sm:block">
               Expedição <span className="text-[#003366]">CTDI</span>
             </h2>
           </div>
@@ -391,48 +392,57 @@ export default function App() {
         {/* Sidebar */}
         <aside 
           className={`
-            fixed inset-y-0 left-0 w-72 bg-white border-r border-stone-100 z-[60]
-            transform transition-transform duration-300 ease-in-out flex flex-col
-            ${isSidebarOpen ? 'translate-x-0 shadow-2xl' : '-translate-x-full'}
+            fixed lg:sticky inset-y-0 left-0 bg-white border-r border-stone-100 z-[60]
+            transition-all duration-300 ease-in-out flex flex-col
+            ${isSidebarOpen 
+              ? 'w-72 translate-x-0 shadow-2xl lg:shadow-none' 
+              : 'w-20 -translate-x-full lg:translate-x-0'
+            }
             no-print
           `}
         >
-          <div className="flex items-center justify-between p-6 pb-0">
-            <p className="text-[10px] font-black text-stone-400 uppercase tracking-[0.2em]">Menu Principal</p>
+          <div className={`flex items-center justify-between p-6 pb-0 ${!isSidebarOpen && 'lg:justify-center'}`}>
+            {isSidebarOpen && (
+              <p className="text-[10px] font-black text-stone-400 uppercase tracking-[0.2em] animate-in fade-in duration-500">Menu Principal</p>
+            )}
             <button 
               onClick={() => setIsSidebarOpen(false)}
-              className="p-2 hover:bg-stone-50 rounded-xl text-stone-400"
+              className="lg:hidden p-2 hover:bg-stone-50 rounded-xl text-stone-400"
             >
               <Plus size={24} className="rotate-45" />
             </button>
           </div>
-          <div className="flex-1 py-10 px-6 space-y-3">
+
+          <div className={`flex-1 py-10 px-4 space-y-3 ${!isSidebarOpen && 'lg:items-center'}`}>
             <SidebarItem 
               icon={<PlusCircle size={22} />} 
               label="Novo Cadastro" 
               active={view === 'cadastro'} 
+              collapsed={!isSidebarOpen}
               onClick={startNewCadastro}
             />
             <SidebarItem 
               icon={<ClipboardList size={22} />} 
               label="Consultar Registros" 
               active={view === 'consulta'} 
-              onClick={() => { setView('consulta'); setSelectedRecord(null); setIsSidebarOpen(false); }} 
+              collapsed={!isSidebarOpen}
+              onClick={() => { setView('consulta'); setSelectedRecord(null); if(window.innerWidth < 1024) setIsSidebarOpen(false); }} 
             />
           </div>
-          <div className="p-8 border-t border-stone-50 bg-stone-50/30">
-            <div className="flex items-center gap-4">
-              <div className="w-12 h-12 rounded-2xl bg-[#003366] flex items-center justify-center text-white text-lg font-black shadow-lg shadow-blue-100">
-                {user.name[0].toUpperCase()}
-              </div>
-              <div className="overflow-hidden flex flex-col">
+
+          <div className={`p-6 border-t border-stone-50 bg-stone-50/30 flex items-center gap-4 transition-all ${!isSidebarOpen && 'lg:justify-center lg:px-0'}`}>
+            <div className={`w-12 h-12 shrink-0 rounded-2xl bg-[#003366] flex items-center justify-center text-white text-lg font-black shadow-lg shadow-blue-100`}>
+              {user.name[0].toUpperCase()}
+            </div>
+            {isSidebarOpen && (
+              <div className="overflow-hidden flex flex-col min-w-0 animate-in fade-in slide-in-from-left-2 duration-300">
                 <p className="text-sm font-black uppercase tracking-tighter truncate text-stone-900">{user.name}</p>
                 <div className="flex items-center gap-1.5">
                   <div className="w-1.5 h-1.5 rounded-full bg-emerald-500 animate-pulse" />
                   <p className="text-[10px] font-bold text-stone-400 uppercase tracking-widest">Online</p>
                 </div>
               </div>
-            </div>
+            )}
           </div>
         </aside>
 
@@ -544,18 +554,36 @@ export default function App() {
 
 // --- Sub-components ---
 
-function SidebarItem({ icon, label, active, collapsed, onClick }: any) {
+function SidebarItem({ icon, label, active, onClick, collapsed }: { icon: React.ReactNode, label: string, active?: boolean, onClick: () => void, collapsed?: boolean }) {
+  const isMobile = window.innerWidth < 1024;
+  const showLabel = !collapsed || isMobile;
+
   return (
-    <button
+    <button 
       onClick={onClick}
-      className={`w-full flex items-center gap-3 p-3 rounded-xl transition-all ${
-        active 
-          ? 'bg-stone-900 text-white shadow-lg shadow-stone-200' 
-          : 'text-stone-500 hover:bg-stone-100 hover:text-stone-900'
-      } ${collapsed ? 'justify-center' : ''}`}
+      className={`
+        w-full flex items-center gap-4 p-4 rounded-2xl transition-all relative overflow-hidden group
+        ${active 
+          ? 'bg-[#003366] text-white shadow-lg shadow-blue-100' 
+          : 'text-stone-400 hover:text-stone-900 hover:bg-stone-50'}
+        ${!showLabel ? 'justify-center' : 'justify-start'}
+      `}
+      title={!showLabel ? label : ''}
     >
-      <div className="flex-shrink-0">{icon}</div>
-      {!collapsed && <span className="text-sm font-bold tracking-tight">{label}</span>}
+      <div className={`transition-transform duration-300 ${active ? 'scale-110' : 'group-hover:scale-110'}`}>
+        {icon}
+      </div>
+      {showLabel && (
+        <span className="text-[10px] font-black uppercase tracking-[0.2em] whitespace-nowrap animate-in fade-in slide-in-from-left-2 duration-300">
+          {label}
+        </span>
+      )}
+      {active && (
+        <motion.div 
+          layoutId="activeTab"
+          className="absolute left-0 w-1 h-6 bg-white rounded-full ml-1"
+        />
+      )}
     </button>
   );
 }
@@ -1058,15 +1086,19 @@ function CadastroView({
              <div className="flex items-center gap-3">
               <button 
                 onClick={() => setScannerActive(true)}
-                className="flex items-center gap-2 bg-stone-800 text-white px-5 py-2.5 rounded-xl hover:bg-stone-700 transition-all text-[10px] font-black uppercase tracking-widest shadow-sm"
+                className="flex items-center gap-2 bg-stone-800 text-white px-5 sm:px-5 py-3 rounded-xl hover:bg-stone-700 transition-all shadow-sm"
+                title="Escanear NF"
               >
-                <Camera size={14} /> Escanear NF
+                <Camera size={18} /> 
+                <span className="hidden sm:inline text-[10px] font-black uppercase tracking-widest ml-1">Escanear NF</span>
               </button>
               <button 
                 onClick={addNF}
-                className="flex items-center gap-2 bg-white text-stone-900 px-5 py-2.5 rounded-xl hover:bg-stone-100 transition-all text-[10px] font-black uppercase tracking-widest shadow-sm"
+                className="flex items-center gap-2 bg-white text-stone-900 px-5 sm:px-5 py-3 rounded-xl hover:bg-stone-100 transition-all shadow-sm"
+                title="Adicionar NF"
               >
-                <Plus size={14} /> Adicionar NF
+                <Plus size={18} /> 
+                <span className="hidden sm:inline text-[10px] font-black uppercase tracking-widest ml-1">Adicionar</span>
               </button>
             </div>
           </div>
@@ -1565,6 +1597,39 @@ function ScannerModal({ onScan, onClose }: { onScan: (text: string) => void, onC
 
 function SignatureFullscreenModal({ onSave, onClose }: { onSave: (img: string) => void, onClose: () => void }) {
   const modalCanvasRef = useRef<SignatureCanvas>(null);
+  const [rotationHint, setRotationHint] = useState(false);
+
+  // Resize handler to avoid "buggy" behavior on rotation
+  useEffect(() => {
+    const handleResize = () => {
+      if (window.innerWidth < window.innerHeight) {
+        setRotationHint(true);
+      } else {
+        setRotationHint(false);
+      }
+      
+      // We don't want to clear the canvas on resize if possible
+      // but react-signature-canvas needs a redraw
+      if (modalCanvasRef.current) {
+         const currentData = modalCanvasRef.current.toDataURL();
+         // Trigger a short delay to allow DOM to settle
+         setTimeout(() => {
+           if (modalCanvasRef.current) {
+              const canvas = modalCanvasRef.current.getCanvas();
+              const ratio =  Math.max(window.devicePixelRatio || 1, 1);
+              canvas.width = canvas.offsetWidth * ratio;
+              canvas.height = canvas.offsetHeight * ratio;
+              canvas.getContext("2d")?.scale(ratio, ratio);
+              modalCanvasRef.current.fromDataURL(currentData);
+           }
+         }, 100);
+      }
+    };
+
+    window.addEventListener('resize', handleResize);
+    handleResize(); // Initial check
+    return () => window.removeEventListener('resize', handleResize);
+  }, []);
 
   const handleDone = () => {
     if (modalCanvasRef.current && !modalCanvasRef.current.isEmpty()) {
@@ -1573,41 +1638,69 @@ function SignatureFullscreenModal({ onSave, onClose }: { onSave: (img: string) =
   };
 
   return (
-    <div className="fixed inset-0 z-[300] bg-white flex flex-col no-print">
-      <div className="h-20 bg-stone-900 text-white flex items-center justify-between px-8">
-        <p className="text-xs font-black uppercase tracking-[0.2em]">Assinatura em Tela Cheia</p>
-        <button onClick={onClose} className="p-2 bg-white/10 rounded-xl"><Plus size={24} className="rotate-45" /></button>
+    <div className="fixed inset-0 z-[300] bg-stone-900 flex flex-col no-print">
+      <div className="h-16 lg:h-20 bg-stone-900 text-white flex items-center justify-between px-6 lg:px-8 shrink-0">
+        <div className="flex items-center gap-3">
+          <div className="p-2 bg-white/10 rounded-xl">
+             <PenTool size={20} />
+          </div>
+          <p className="text-[10px] font-black uppercase tracking-[0.2em]">Assinatura Digital</p>
+        </div>
+        <button onClick={onClose} className="p-3 bg-white/10 hover:bg-white/20 rounded-2xl transition-all">
+          <Plus size={24} className="rotate-45" />
+        </button>
       </div>
       
-      <div className="flex-1 bg-stone-50 relative overflow-hidden flex items-center justify-center">
+      <div className="flex-1 bg-stone-50 relative overflow-hidden flex items-center justify-center p-3 sm:p-6 lg:p-10">
         {/* Instructional background text */}
-        <div className="absolute inset-0 flex items-center justify-center pointer-events-none opacity-5 rotate-90 sm:rotate-0">
-          <h2 className="text-6xl font-black uppercase tracking-[0.5em] text-center">Assine Aqui</h2>
+        <div className="absolute inset-0 flex items-center justify-center pointer-events-none opacity-[0.03]">
+          <h2 className="text-4xl sm:text-6xl lg:text-8xl font-black uppercase tracking-[0.5em] text-center">Assine Aqui</h2>
         </div>
         
-        <div className="w-full h-full p-4">
+        <div className="w-full h-full relative">
           <SignatureCanvas 
             ref={modalCanvasRef}
             penColor="black"
             canvasProps={{ 
-              className: "w-full h-full bg-white rounded-3xl shadow-inner border-2 border-stone-100",
+              className: "w-full h-full bg-white rounded-[2rem] sm:rounded-[3rem] shadow-2xl border-4 border-white cursor-crosshair",
             }}
           />
+          
+          <AnimatePresence>
+            {rotationHint && (
+              <motion.div 
+                initial={{ opacity: 0, scale: 0.9 }}
+                animate={{ opacity: 1, scale: 1 }}
+                exit={{ opacity: 0 }}
+                className="absolute inset-0 z-10 flex items-center justify-center bg-stone-900/40 backdrop-blur-sm rounded-[2rem] sm:rounded-[3rem] pointer-events-none"
+              >
+                 <div className="bg-white p-6 rounded-3xl shadow-2xl flex flex-col items-center gap-4 text-center">
+                    <div className="p-4 bg-blue-50 text-[#003366] rounded-2xl animate-bounce">
+                       <RotateCcw size={32} />
+                    </div>
+                    <div>
+                      <p className="text-xs font-black uppercase tracking-tighter text-stone-900">Gire o celular</p>
+                      <p className="text-[10px] font-bold text-stone-400 uppercase tracking-widest mt-1">Para ter mais espaço</p>
+                    </div>
+                 </div>
+              </motion.div>
+            )}
+          </AnimatePresence>
         </div>
       </div>
 
-      <div className="p-8 bg-white border-t border-stone-100 flex gap-4">
+      <div className="p-6 sm:p-8 bg-white border-t border-stone-100 flex gap-4 shrink-0">
         <button 
           onClick={() => modalCanvasRef.current?.clear()}
-          className="flex-1 py-5 rounded-3xl border-2 border-stone-200 text-stone-400 font-black uppercase tracking-widest text-xs hover:bg-stone-50 transition-all"
+          className="flex-1 py-4 sm:py-5 rounded-2xl sm:rounded-3xl border-2 border-stone-100 text-stone-400 font-black uppercase tracking-widest text-[10px] hover:bg-stone-50 transition-all active:scale-95"
         >
           Limpar
         </button>
         <button 
           onClick={handleDone}
-          className="flex-[2] py-5 rounded-3xl bg-[#003366] text-white font-black uppercase tracking-widest text-xs hover:shadow-xl hover:shadow-blue-100 transition-all active:scale-95"
+          className="flex-[2.5] py-4 sm:py-5 rounded-2xl sm:rounded-3xl bg-[#003366] text-white font-black uppercase tracking-widest text-[10px] hover:shadow-xl hover:shadow-blue-100 transition-all active:scale-95 flex items-center justify-center gap-3"
         >
-          Confirmar Assinatura
+          Confirmar <PlusCircle size={18} />
         </button>
       </div>
     </div>
