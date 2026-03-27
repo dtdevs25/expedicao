@@ -47,29 +47,21 @@ const INITIAL_FORM_DATA: RegistroExpedicao = {
 
 // --- Components ---
 
-const Logo = ({ size = "md", className = "" }: { size?: "sm" | "md" | "lg", className?: string }) => {
+const BrandLogo = ({ size = "md", className = "" }: { size?: "sm" | "md" | "lg", className?: string }) => {
   const sizes = {
-    sm: "w-6 h-6 text-[10px]",
-    md: "w-10 h-10 text-sm",
-    lg: "w-16 h-16 text-2xl"
+    sm: "h-8",
+    md: "h-12",
+    lg: "h-24"
   };
   return (
-    <div className={`flex items-center -space-x-1 ${className}`}>
-      {['C', 'T', 'D', 'I'].map((letter, i) => (
-        <div
-          key={i}
-          className={`${sizes[size]} flex items-center justify-center border-[2.5px] border-current rotate-45 bg-white`}
-          style={{ borderRadius: '2px' }}
-        >
-          <span className="-rotate-45 font-black italic tracking-tighter">{letter}</span>
-        </div>
-      ))}
+    <div className={`flex items-center justify-center ${className}`}>
+      <img src="/logo_branco.png" alt="Logo" className={`${sizes[size]} object-contain`} />
     </div>
   );
 };
 
 export default function App() {
-  const [user, setUser] = useState<{ name: string, token: string } | null>(null);
+  const [user, setUser] = useState<{ name: string, token: string, mustChangePassword?: boolean } | null>(null);
   const [setupRequired, setSetupRequired] = useState<boolean>(false);
   const [view, setView] = useState<'cadastro' | 'consulta' | 'preview'>('cadastro');
   const [isSidebarOpen, setIsSidebarOpen] = useState(true);
@@ -227,8 +219,22 @@ export default function App() {
     return <LoginView onLogin={(userData: any) => {
       setUser(userData);
       localStorage.setItem('ctdi_user', JSON.stringify(userData));
-      fetchRecords(userData.token);
+      if (!userData.mustChangePassword) {
+        fetchRecords(userData.token);
+      }
     }} />;
+  }
+
+  if (user.mustChangePassword) {
+    return <ChangePasswordView 
+      token={user.token} 
+      onComplete={(newToken) => {
+        const updatedUser = { ...user, token: newToken, mustChangePassword: false };
+        setUser(updatedUser);
+        localStorage.setItem('ctdi_user', JSON.stringify(updatedUser));
+        fetchRecords(newToken);
+      }} 
+    />;
   }
 
   return (
@@ -243,7 +249,7 @@ export default function App() {
             <Menu size={20} />
           </button>
           <div className="text-stone-900 scale-110 origin-left">
-            <Logo size="md" />
+            <BrandLogo size="sm" className="brightness-0" />
           </div>
           <span className="hidden md:block font-bold text-stone-400 text-xs uppercase tracking-widest ml-2">
             Sistema de Expedição
@@ -472,7 +478,10 @@ function SidebarItem({ icon, label, active, collapsed, onClick }: any) {
 function LoginView({ onLogin }: { onLogin: (data: any) => void }) {
   const [username, setUsername] = useState('');
   const [password, setPassword] = useState('');
+  const [emailForReset, setEmailForReset] = useState('');
+  const [isResetMode, setIsResetMode] = useState(false);
   const [error, setError] = useState('');
+  const [success, setSuccess] = useState('');
   const [loading, setLoading] = useState(false);
 
   const handleSubmit = async (e: React.FormEvent) => {
@@ -498,6 +507,31 @@ function LoginView({ onLogin }: { onLogin: (data: any) => void }) {
     }
   };
 
+  const handleResetPassword = async (e: React.FormEvent) => {
+    e.preventDefault();
+    setError('');
+    setSuccess('');
+    setLoading(true);
+    try {
+      const res = await fetch('/api/auth/forgot-password', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ email: emailForReset })
+      });
+      const data = await res.json();
+      if (res.ok) {
+        setSuccess('Senha temporária enviada para o seu e-mail!');
+        setTimeout(() => setIsResetMode(false), 3000);
+      } else {
+        setError(data.error || 'Erro ao processar solicitação');
+      }
+    } catch (err) {
+      setError('Erro de conexão');
+    } finally {
+      setLoading(false);
+    }
+  };
+
   return (
     <div className="min-h-screen bg-stone-100 flex items-center justify-center p-4">
       <motion.div 
@@ -506,50 +540,102 @@ function LoginView({ onLogin }: { onLogin: (data: any) => void }) {
         className="bg-white w-full max-w-md rounded-3xl shadow-2xl overflow-hidden"
       >
         <div className="bg-stone-900 p-12 flex flex-col items-center text-white">
-          <Logo size="lg" />
-          <h1 className="mt-6 text-2xl font-black tracking-tighter uppercase">Acesso ao Sistema</h1>
+          <BrandLogo size="lg" />
+          <h1 className="mt-6 text-2xl font-black tracking-tighter uppercase">
+            {isResetMode ? 'Recuperar Acesso' : 'Acesso ao Sistema'}
+          </h1>
           <p className="text-stone-400 text-xs font-bold tracking-widest uppercase mt-2">Controle de Expedição</p>
         </div>
         
-        <form onSubmit={handleSubmit} className="p-10 space-y-6">
-          {error && (
-            <div className="bg-red-50 text-red-600 p-4 rounded-xl text-xs font-bold uppercase tracking-widest border border-red-100 flex items-center gap-2">
-              <AlertCircle size={16} /> {error}
+        {isResetMode ? (
+          <form onSubmit={handleResetPassword} className="p-10 space-y-6">
+            {error && <div className="bg-red-50 text-red-600 p-4 rounded-xl text-xs font-bold uppercase tracking-widest border border-red-100 flex items-center gap-2"><AlertCircle size={16} /> {error}</div>}
+            {success && <div className="bg-emerald-50 text-emerald-600 p-4 rounded-xl text-xs font-bold uppercase tracking-widest border border-emerald-100 flex items-center gap-2"><PlusCircle size={16} /> {success}</div>}
+            
+            <div className="space-y-4">
+              <p className="text-stone-500 text-xs font-bold uppercase leading-relaxed text-center">
+                Informe o seu e-mail cadastrado para receber uma senha temporária.
+              </p>
+              <div className="relative">
+                <FileText className="absolute left-4 top-1/2 -translate-y-1/2 text-stone-400" size={18} />
+                <input
+                  type="email"
+                  placeholder="Seu E-mail"
+                  value={emailForReset}
+                  onChange={(e) => setEmailForReset(e.target.value)}
+                  className="w-full bg-stone-50 border-none rounded-2xl py-4 pl-12 pr-4 text-sm focus:ring-2 focus:ring-stone-900 transition-all"
+                  required
+                />
+              </div>
             </div>
-          )}
-          <div className="space-y-4">
-            <div className="relative">
-              <User className="absolute left-4 top-1/2 -translate-y-1/2 text-stone-400" size={18} />
-              <input
-                type="text"
-                placeholder="Usuário"
-                value={username}
-                onChange={(e) => setUsername(e.target.value)}
-                className="w-full bg-stone-50 border-none rounded-2xl py-4 pl-12 pr-4 text-sm focus:ring-2 focus:ring-stone-900 transition-all"
-                required
-              />
+
+            <button
+              type="submit"
+              disabled={loading}
+              className={`w-full bg-emerald-600 text-white py-4 rounded-2xl font-black uppercase tracking-widest hover:bg-emerald-700 transition-all active:scale-[0.98] shadow-xl shadow-emerald-200 ${loading && 'opacity-50'}`}
+            >
+              {loading ? 'Enviando...' : 'Enviar Nova Senha'}
+            </button>
+
+            <button 
+              type="button"
+              onClick={() => setIsResetMode(false)}
+              className="w-full text-stone-400 text-[10px] font-black uppercase tracking-widest hover:text-stone-900"
+            >
+              Voltar para o Login
+            </button>
+          </form>
+        ) : (
+          <form onSubmit={handleSubmit} className="p-10 space-y-6">
+            {error && (
+              <div className="bg-red-50 text-red-600 p-4 rounded-xl text-xs font-bold uppercase tracking-widest border border-red-100 flex items-center gap-2">
+                <AlertCircle size={16} /> {error}
+              </div>
+            )}
+            <div className="space-y-4">
+              <div className="relative">
+                <User className="absolute left-4 top-1/2 -translate-y-1/2 text-stone-400" size={18} />
+                <input
+                  type="text"
+                  placeholder="Usuário"
+                  value={username}
+                  onChange={(e) => setUsername(e.target.value)}
+                  className="w-full bg-stone-50 border-none rounded-2xl py-4 pl-12 pr-4 text-sm focus:ring-2 focus:ring-stone-900 transition-all"
+                  required
+                />
+              </div>
+              <div className="relative">
+                <Lock className="absolute left-4 top-1/2 -translate-y-1/2 text-stone-400" size={18} />
+                <input
+                  type="password"
+                  placeholder="Senha"
+                  value={password}
+                  onChange={(e) => setPassword(e.target.value)}
+                  className="w-full bg-stone-50 border-none rounded-2xl py-4 pl-12 pr-4 text-sm focus:ring-2 focus:ring-stone-900 transition-all"
+                  required
+                />
+              </div>
             </div>
-            <div className="relative">
-              <Lock className="absolute left-4 top-1/2 -translate-y-1/2 text-stone-400" size={18} />
-              <input
-                type="password"
-                placeholder="Senha"
-                value={password}
-                onChange={(e) => setPassword(e.target.value)}
-                className="w-full bg-stone-50 border-none rounded-2xl py-4 pl-12 pr-4 text-sm focus:ring-2 focus:ring-stone-900 transition-all"
-                required
-              />
+
+            <div className="flex justify-end pr-2">
+              <button 
+                type="button" 
+                onClick={() => setIsResetMode(true)}
+                className="text-[10px] font-black uppercase tracking-widest text-stone-400 hover:text-red-500 transition-all flex items-center gap-2"
+              >
+                <RotateCcw size={14} /> Esqueci minha senha
+              </button>
             </div>
-          </div>
-          
-          <button
-            type="submit"
-            disabled={loading}
-            className={`w-full bg-stone-900 text-white py-4 rounded-2xl font-black uppercase tracking-widest hover:bg-stone-800 transition-all active:scale-[0.98] shadow-xl shadow-stone-200 ${loading && 'opacity-50'}`}
-          >
-            {loading ? 'Entrando...' : 'Entrar'}
-          </button>
-        </form>
+            
+            <button
+              type="submit"
+              disabled={loading}
+              className={`w-full bg-stone-900 text-white py-4 rounded-2xl font-black uppercase tracking-widest hover:bg-stone-800 transition-all active:scale-[0.98] shadow-xl shadow-stone-200 ${loading && 'opacity-50'}`}
+            >
+              {loading ? 'Entrando...' : 'Entrar'}
+            </button>
+          </form>
+        )}
       </motion.div>
     </div>
   );
@@ -558,6 +644,7 @@ function LoginView({ onLogin }: { onLogin: (data: any) => void }) {
 function SetupView({ onComplete }: { onComplete: (data: any) => void }) {
   const [username, setUsername] = useState('');
   const [password, setPassword] = useState('');
+  const [email, setEmail] = useState('');
   const [name, setName] = useState('');
   const [error, setError] = useState('');
   const [loading, setLoading] = useState(false);
@@ -570,7 +657,7 @@ function SetupView({ onComplete }: { onComplete: (data: any) => void }) {
       const res = await fetch('/api/auth/setup', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ username, password, name })
+        body: JSON.stringify({ username, password, name, email })
       });
       const data = await res.json();
       if (res.ok) {
@@ -593,19 +680,18 @@ function SetupView({ onComplete }: { onComplete: (data: any) => void }) {
         className="bg-white w-full max-w-md rounded-[2.5rem] shadow-2xl overflow-hidden"
       >
         <div className="bg-stone-900 p-12 flex flex-col items-center text-white text-center">
-          <div className="p-4 bg-emerald-500 rounded-2xl mb-4 text-white">
-             <Settings size={32} />
-          </div>
-          <h1 className="text-2xl font-black tracking-tighter uppercase">Configuração Inicial</h1>
+          <BrandLogo size="lg" />
+          <h1 className="text-2xl font-black tracking-tighter uppercase mt-6">Configuração Inicial</h1>
           <p className="text-stone-400 text-[10px] font-bold tracking-widest uppercase mt-2">Crie o usuário administrador mestre</p>
         </div>
         
         <form onSubmit={handleSubmit} className="p-10 space-y-5">
           {error && <div className="text-red-600 bg-red-50 p-4 rounded-xl text-xs font-bold uppercase">{error}</div>}
-          <InputField label="Nome Completo" value={name} onChange={setName} />
-          <InputField label="Usuário de Acesso" value={username} onChange={setUsername} />
-          <div className="relative">
-             <InputField label="Senha Mestra" value={password} onChange={setPassword} />
+          <div className="space-y-4">
+            <InputField label="Nome Completo" value={name} onChange={setName} icon={<User size={18} />} />
+            <InputField label="E-mail de Recuperação" value={email} onChange={setEmail} icon={<FileText size={18} />} />
+            <InputField label="Usuário de Acesso" value={username} onChange={setUsername} icon={<LayoutDashboard size={18} />} />
+            <InputField label="Senha Mestra" value={password} onChange={setPassword} icon={<Lock size={18} />} type="password" />
           </div>
           
           <button
@@ -617,6 +703,94 @@ function SetupView({ onComplete }: { onComplete: (data: any) => void }) {
           </button>
         </form>
       </motion.div>
+    </div>
+  );
+}
+
+function ChangePasswordView({ token, onComplete }: { token: string, onComplete: (token: string) => void }) {
+  const [newPassword, setNewPassword] = useState('');
+  const [confirmPassword, setConfirmPassword] = useState('');
+  const [error, setError] = useState('');
+  const [loading, setLoading] = useState(false);
+
+  const handleSubmit = async (e: React.FormEvent) => {
+    e.preventDefault();
+    if (newPassword !== confirmPassword) return setError('As senhas não coincidem');
+    if (newPassword.length < 6) return setError('A senha deve ter pelo menos 6 caracteres');
+    
+    setError('');
+    setLoading(true);
+    try {
+      const res = await fetch('/api/auth/change-password', {
+        method: 'POST',
+        headers: { 
+          'Content-Type': 'application/json',
+          'Authorization': `Bearer ${token}`
+        },
+        body: JSON.stringify({ newPassword })
+      });
+      const data = await res.json();
+      if (res.ok) {
+        onComplete(token);
+      } else {
+        setError(data.error || 'Erro ao atualizar senha');
+      }
+    } catch (err) {
+      setError('Erro de conexão');
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  return (
+    <div className="min-h-screen bg-stone-900 flex items-center justify-center p-4">
+      <motion.div 
+        initial={{ opacity: 0, scale: 0.9 }}
+        animate={{ opacity: 1, scale: 1 }}
+        className="bg-white w-full max-w-md rounded-[2.5rem] shadow-2xl overflow-hidden"
+      >
+        <div className="bg-emerald-600 p-12 flex flex-col items-center text-white text-center">
+          <Lock size={48} className="mb-4" />
+          <h1 className="text-2xl font-black tracking-tighter uppercase">Defina sua Senha</h1>
+          <p className="text-emerald-100 text-[10px] font-bold tracking-widest uppercase mt-2">Por segurança, você deve escolher uma senha permanente</p>
+        </div>
+        
+        <form onSubmit={handleSubmit} className="p-10 space-y-5">
+          {error && <div className="text-red-600 bg-red-50 p-4 rounded-xl text-xs font-bold uppercase">{error}</div>}
+          <div className="space-y-4">
+            <InputField label="Nova Senha" value={newPassword} onChange={setNewPassword} icon={<Lock size={18} />} type="password" />
+            <InputField label="Confirmar Nova Senha" value={confirmPassword} onChange={setConfirmPassword} icon={<Lock size={18} />} type="password" />
+          </div>
+          
+          <button
+            type="submit"
+            disabled={loading}
+            className="w-full bg-stone-900 text-white py-5 rounded-2xl font-black uppercase tracking-widest hover:bg-stone-800 shadow-xl shadow-stone-200 mt-4"
+          >
+            {loading ? 'Salvando...' : 'Atualizar e Entrar'}
+          </button>
+        </form>
+      </motion.div>
+    </div>
+  );
+}
+
+function InputField({ label, value, onChange, icon, type = "text" }: any) {
+  return (
+    <div className="space-y-1.5">
+      <label className="text-[10px] font-black uppercase tracking-widest text-stone-400 ml-1">{label}</label>
+      <div className="relative">
+        <div className="absolute left-4 top-1/2 -translate-y-1/2 text-stone-300">
+          {icon}
+        </div>
+        <input
+          type={type}
+          value={value}
+          onChange={(e) => onChange(e.target.value)}
+          className="w-full bg-stone-50 border-none rounded-2xl py-4 pl-12 pr-4 text-sm focus:ring-2 focus:ring-stone-900 transition-all"
+          required
+        />
+      </div>
     </div>
   );
 }

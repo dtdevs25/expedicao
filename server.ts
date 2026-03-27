@@ -69,18 +69,18 @@ app.get('/api/auth/check-setup', async (req, res) => {
 });
 
 app.post('/api/auth/setup', async (req, res) => {
-  const { username, password, name } = req.body;
+  const { username, password, name, email } = req.body;
   try {
     const userCount = await prisma.user.count();
     if (userCount > 0) return res.status(400).json({ error: 'Setup já realizado.' });
 
     const hashedPassword = await bcrypt.hash(password, 10);
     const user = await prisma.user.create({
-      data: { username, password: hashedPassword, name, role: 'ADMIN' }
+      data: { username, password: hashedPassword, name, email, role: 'ADMIN' }
     });
     
     const token = jwt.sign({ id: user.id, username: user.username }, JWT_SECRET, { expiresIn: '7d' });
-    res.json({ token, user: { name: user.name, username: user.username } });
+    res.json({ token, user: { name: user.name, username: user.username, mustChangePassword: user.mustChangePassword } });
   } catch (error) {
     console.error('Setup error:', error);
     res.status(500).json({ error: 'Erro no setup inicial' });
@@ -97,10 +97,72 @@ app.post('/api/auth/login', async (req, res) => {
     if (!validPassword) return res.status(401).json({ error: 'Credenciais inválidas' });
 
     const token = jwt.sign({ id: user.id, username: user.username }, JWT_SECRET, { expiresIn: '7d' });
-    res.json({ token, user: { name: user.name, username: user.username } });
+    res.json({ token, user: { name: user.name, username: user.username, mustChangePassword: user.mustChangePassword } });
   } catch (error) {
     console.error('Login error:', error);
     res.status(500).json({ error: 'Erro no login' });
+  }
+});
+
+app.post('/api/auth/forgot-password', async (req, res) => {
+  const { email } = req.body;
+  try {
+    const user = await prisma.user.findUnique({ where: { email } });
+    if (!user) return res.status(404).json({ error: 'E-mail não cadastrado no sistema.' });
+
+    // Gerar senha temporária de 10 caracteres
+    const tempPassword = Math.random().toString(36).slice(-10);
+    const hashedPassword = await bcrypt.hash(tempPassword, 10);
+
+    await prisma.user.update({
+      where: { id: user.id },
+      data: { 
+        password: hashedPassword,
+        mustChangePassword: true 
+      }
+    });
+
+    // Enviar e-mail
+    await transporter.sendMail({
+      from: `"Expedição CTDI" <${process.env.SMTP_USER}>`,
+      to: user.email,
+      subject: "Recuperação de Senha - Sistema de Expedição",
+      html: `
+        <div style="font-family: sans-serif; padding: 20px; color: #333;">
+          <h2>Recuperação de Acesso</h2>
+          <p>Olá <b>${user.name}</b>,</p>
+          <p>Você solicitou a recuperação de senha para o sistema de expedição CTDI.</p>
+          <p>Sua nova senha temporária é: <b style="font-size: 1.2rem; color: #10b981;">${tempPassword}</b></p>
+          <p>Ao realizar o login, o sistema solicitará que você defina uma nova senha definitiva.</p>
+          <hr />
+          <p style="font-size: 0.8rem; color: #666;">Se você não solicitou esta alteração, entre em contato imediatamente com o administrador.</p>
+        </div>
+      `
+    });
+
+    res.json({ message: 'E-mail enviado com sucesso.' });
+  } catch (error) {
+    console.error('Forgot password error:', error);
+    res.status(500).json({ error: 'Erro ao processar recuperação de senha.' });
+  }
+});
+
+app.post('/api/auth/change-password', authMiddleware, async (req, res) => {
+  const { newPassword } = req.body;
+  const userId = (req as any).user.id;
+
+  try {
+    const hashedPassword = await bcrypt.hash(newPassword, 10);
+    await prisma.user.update({
+      where: { id: userId },
+      data: { 
+        password: hashedPassword,
+        mustChangePassword: false 
+      }
+    });
+    res.json({ message: 'Senha atualizada com sucesso.' });
+  } catch (error) {
+    res.status(500).json({ error: 'Erro ao atualizar senha.' });
   }
 });
 

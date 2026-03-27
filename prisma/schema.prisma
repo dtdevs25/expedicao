@@ -38,9 +38,11 @@ model NotaFiscal {
   expedicaoId    Int
 }
 model User {
-  id       Int    @id @default(autoincrement())
-  username String @unique
-  password String // Hashed
-  name     String
-  role     String @default("OPERADOR")
+  id                 Int     @id @default(autoincrement())
+  username           String  @unique
+  email              String  @unique
+  password           String  // Hashed
+  name               String
+  role               String  @default("OPERADOR")
+  mustChangePassword Boolean @default(false)
 }
