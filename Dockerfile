@@ -24,6 +24,10 @@ COPY tsconfig.json ./
 # For simplicity in this env, we'll use tsx.
 RUN npm install -g tsx
 
+# Puppeteer environment variables for ARM support
+ENV PUPPETEER_SKIP_CHROMIUM_DOWNLOAD=true
+ENV PUPPETEER_EXECUTABLE_PATH=/usr/bin/chromium
+
 # Puppeteer and Prisma dependencies for Linux
 RUN apt-get update && apt-get install -y \
     openssl \
@@ -63,6 +67,7 @@ RUN apt-get update && apt-get install -y \
     lsb-release \
     wget \
     xdg-utils \
+    chromium \
     --no-install-recommends \
     && rm -rf /var/lib/apt/lists/*
 

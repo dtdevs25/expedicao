@@ -4,10 +4,11 @@ import {
   ChevronLeft, Search, Eye, User, Lock, LayoutDashboard,
   ClipboardList, PlusCircle, Truck, Settings, Heart,
   RotateCcw, Wrench, ArrowLeftRight, AlertCircle, Eraser,
-  PenTool, Edit3, EyeOff
+  PenTool, Edit3, EyeOff, Camera
 } from 'lucide-react';
 import { motion, AnimatePresence } from 'motion/react';
 import SignatureCanvas from 'react-signature-canvas';
+import { Html5QrcodeScanner } from 'html5-qrcode';
 import { RegistroExpedicao, NFItem, NaturezaOperacao } from './types';
 
 // --- Constants & Mock Data ---
@@ -43,11 +44,12 @@ const INITIAL_FORM_DATA: RegistroExpedicao = {
 
 // --- Components ---
 
-const BrandLogo = ({ size = "md", className = "" }: { size?: "sm" | "md" | "lg", className?: string }) => {
+const BrandLogo = ({ size = "md", className = "" }: { size?: "sm" | "md" | "lg" | "xl", className?: string }) => {
   const sizes = {
     sm: "h-8",
     md: "h-12",
-    lg: "h-24"
+    lg: "h-24",
+    xl: "h-[120px]"
   };
   return (
     <div className={`flex items-center justify-center ${className}`}>
@@ -60,7 +62,7 @@ export default function App() {
   const [user, setUser] = useState<{ name: string, token: string, mustChangePassword?: boolean } | null>(null);
   const [isInitializing, setIsInitializing] = useState<boolean>(true);
   const [view, setView] = useState<'cadastro' | 'consulta' | 'preview'>('cadastro');
-  const [isSidebarOpen, setIsSidebarOpen] = useState(true);
+  const [isSidebarOpen, setIsSidebarOpen] = useState(false); // Changed initial state to false for mobile-first
   const [records, setRecords] = useState<RegistroExpedicao[]>([]);
   const [formData, setFormData] = useState<RegistroExpedicao>(INITIAL_FORM_DATA);
   const [selectedRecord, setSelectedRecord] = useState<RegistroExpedicao | null>(null);
@@ -203,9 +205,12 @@ export default function App() {
   const handleLogout = () => setUser(null);
 
   const startNewCadastro = () => {
-    setFormData(INITIAL_FORM_DATA);
+    const now = new Date();
+    const formattedDate = now.toLocaleDateString('pt-BR') + ' ' + now.toLocaleTimeString('pt-BR', { hour: '2-digit', minute: '2-digit' });
+    setFormData({ ...INITIAL_FORM_DATA, dataSaida: formattedDate });
     setView('cadastro');
     setSelectedRecord(null);
+    setIsSidebarOpen(false); // Close sidebar on mobile after navigation
   };
 
   const deleteRecord = async (codigo: string) => {
@@ -231,6 +236,7 @@ export default function App() {
   const editRecord = (record: RegistroExpedicao) => {
     setFormData(record);
     setView('cadastro');
+    setIsSidebarOpen(false); // Close sidebar on mobile after navigation
   };
 
   if (isInitializing) {
@@ -268,8 +274,11 @@ export default function App() {
     <div className="h-screen bg-stone-50 flex flex-col font-sans text-stone-900 overflow-hidden">
       {/* Sidebar Overlay (Mobile only) */}
       {isSidebarOpen && (
-        <div 
-          className="lg:hidden fixed inset-0 bg-stone-900/40 backdrop-blur-sm z-50 animate-fade-in"
+        <motion.div 
+          initial={{ opacity: 0 }}
+          animate={{ opacity: 1 }}
+          exit={{ opacity: 0 }}
+          className="lg:hidden fixed inset-0 bg-stone-900/40 backdrop-blur-sm z-50"
           onClick={() => setIsSidebarOpen(false)}
         />
       )}
@@ -284,12 +293,12 @@ export default function App() {
             <Menu size={20} />
           </button>
           
-          <div className="flex items-center gap-3">
+          <div className="flex items-center gap-6">
             <div className="text-stone-900 scale-[1.3] origin-left transition-transform hover:scale-[1.35]">
               <BrandLogo size="sm" className="brightness-0" />
             </div>
             <h2 className="text-sm lg:text-base font-black tracking-tighter uppercase hidden sm:block">
-              Expedição <span className="text-emerald-600">CTDI</span>
+              Expedição <span className="text-[#003366]">CTDI</span>
             </h2>
           </div>
         </div>
@@ -365,12 +374,14 @@ export default function App() {
         </AnimatePresence>
 
         {/* Sidebar */}
-        <aside 
+        <motion.aside 
+          initial={false}
+          animate={{ x: isSidebarOpen ? 0 : '-100%' }}
+          transition={{ type: "spring", stiffness: 300, damping: 30 }}
           className={`
             fixed lg:relative inset-y-0 left-0 w-72 bg-white border-r border-stone-200 shadow-xl 
-            lg:shadow-none z-[60] lg:z-0 transform transition-transform duration-300 ease-in-out
-            ${isSidebarOpen ? 'translate-x-0' : '-translate-x-full'}
-            lg:translate-x-0 ${!isSidebarOpen && 'lg:hidden'}
+            lg:shadow-none z-[60] lg:z-0
+            lg:translate-x-0
           `}
         >
           <nav className="flex-1 py-6 px-3 space-y-2">
@@ -378,23 +389,23 @@ export default function App() {
               icon={<PlusCircle size={20} />} 
               label="Novo Cadastro" 
               active={view === 'cadastro'} 
-              collapsed={!isSidebarOpen}
+              collapsed={!isSidebarOpen && window.innerWidth < 1024} // Only collapse on mobile if sidebar is closed
               onClick={startNewCadastro}
             />
             <SidebarItem 
               icon={<ClipboardList size={20} />} 
               label="Consultar Registros" 
               active={view === 'consulta'} 
-              collapsed={!isSidebarOpen}
-              onClick={() => { setView('consulta'); setSelectedRecord(null); }}
+              collapsed={!isSidebarOpen && window.innerWidth < 1024} // Only collapse on mobile if sidebar is closed
+              onClick={() => { setView('consulta'); setSelectedRecord(null); setIsSidebarOpen(false); }} // Close sidebar on mobile after navigation
             />
           </nav>
           <div className="p-4 border-t border-stone-100 bg-stone-50/50">
-            <div className={`flex items-center gap-3 ${!isSidebarOpen && 'justify-center'}`}>
+            <div className={`flex items-center gap-3 ${!isSidebarOpen && window.innerWidth < 1024 && 'justify-center'}`}>
               <div className="w-10 h-10 rounded-xl bg-stone-900 flex items-center justify-center text-white text-sm font-black shadow-lg shadow-stone-200">
                 {user.name[0].toUpperCase()}
               </div>
-              {isSidebarOpen && (
+              {(isSidebarOpen || window.innerWidth >= 1024) && (
                 <div className="overflow-hidden flex flex-col">
                   <p className="text-xs font-black uppercase tracking-tighter truncate">{user.name}</p>
                   <p className="text-[10px] font-bold text-stone-400 uppercase tracking-widest">Operador</p>
@@ -402,7 +413,7 @@ export default function App() {
               )}
             </div>
           </div>
-        </aside>
+        </motion.aside>
 
         {/* Main Content */}
         <main className="flex-1 overflow-y-auto p-4 md:p-8">
@@ -603,12 +614,12 @@ function LoginView({ onLogin }: { onLogin: (data: any) => void }) {
             animate={{ scale: 1, rotate: 0 }}
             transition={{ type: "spring", stiffness: 100 }}
           >
-            <BrandLogo size="lg" className="mb-0 drop-shadow-[0_0_15px_rgba(16,185,129,0.3)]" />
+            <BrandLogo size="xl" className="mb-0 drop-shadow-[0_0_15px_rgba(16,185,129,0.3)]" />
           </motion.div>
           <h1 className="mt-2 text-xl font-black tracking-tighter uppercase leading-none">
             {isResetMode ? 'Recuperar Acesso' : 'Acesso ao Sistema'}
           </h1>
-          <p className="text-stone-400 text-[10px] font-bold tracking-widest uppercase mt-2">Controle de Expedição</p>
+          <p className="text-stone-400 text-[10px] font-bold tracking-widest uppercase mt-4">Controle de Expedição</p>
         </div>
         
         {isResetMode ? (
@@ -758,9 +769,9 @@ function SetupView({ onComplete }: { onComplete: (data: any) => void }) {
         <form onSubmit={handleSubmit} className="p-10 space-y-5">
           {error && <div className="text-red-600 bg-red-50 p-4 rounded-xl text-xs font-bold uppercase">{error}</div>}
           <div className="space-y-4">
-            <InputField label="Nome Completo" value={name} onChange={setName} icon={<User size={18} />} />
-            <InputField label="Seu E-mail" value={email} onChange={setEmail} icon={<FileText size={18} />} />
-            <InputField label="Senha" value={password} onChange={setPassword} icon={<Lock size={18} />} type="password" />
+            <InputField label="Nome Completo" value={name} onChange={setName} />
+            <InputField label="Seu E-mail" value={email} onChange={setEmail} />
+            <InputField label="Senha" value={password} onChange={setPassword} type="password" />
           </div>
           
           <button
@@ -827,8 +838,8 @@ function ChangePasswordView({ token, onComplete }: { token: string, onComplete: 
         <form onSubmit={handleSubmit} className="p-10 space-y-5">
           {error && <div className="text-red-600 bg-red-50 p-4 rounded-xl text-xs font-bold uppercase">{error}</div>}
           <div className="space-y-4">
-            <InputField label="Nova Senha" value={newPassword} onChange={setNewPassword} icon={<Lock size={18} />} type="password" />
-            <InputField label="Confirmar Nova Senha" value={confirmPassword} onChange={setConfirmPassword} icon={<Lock size={18} />} type="password" />
+            <InputField label="Nova Senha" value={newPassword} onChange={setNewPassword} type="password" />
+            <InputField label="Confirmar Nova Senha" value={confirmPassword} onChange={setConfirmPassword} type="password" />
           </div>
           
           <button
@@ -857,6 +868,7 @@ function CadastroView({
   setNotification: (n: { message: string, type: 'error' | 'success' } | null) => void
 }) {
   const sigCanvas = useRef<SignatureCanvas>(null);
+  const [isScannerActive, setScannerActive] = useState(false);
 
   // Fix for signature canvas resizing
   useEffect(() => {
@@ -991,12 +1003,12 @@ function CadastroView({
           <div className="p-8 space-y-5">
             <div className="grid grid-cols-1 sm:grid-cols-2 gap-5">
               <InputField label="Volumes" value={data.volumes} onChange={(v) => setData((prev: any) => ({ ...prev, volumes: v }))} />
-              <InputField label="Placa do Veículo" value={data.placaVeiculo} onChange={(v) => setData((prev: any) => ({ ...prev, placaVeiculo: v }))} />
+              <InputField label="Placa do Veículo" value={data.placaVeiculo} onChange={(v) => setData((prev: any) => ({ ...prev, placaVeiculo: v }))} mask="placa" />
             </div>
             <InputField label="Transportadora" value={data.transportadora} onChange={(v) => setData((prev: any) => ({ ...prev, transportadora: v }))} />
             <div className="grid grid-cols-1 sm:grid-cols-2 gap-5">
               <InputField label="Motorista" value={data.motorista} onChange={(v) => setData((prev: any) => ({ ...prev, motorista: v }))} />
-              <InputField label="RG/CPF" value={data.rgCpf} onChange={(v) => setData((prev: any) => ({ ...prev, rgCpf: v }))} />
+              <InputField label="RG/CPF" value={data.rgCpf} onChange={(v) => setData((prev: any) => ({ ...prev, rgCpf: v }))} mask="rg" />
             </div>
             <InputField label="Ajudante" value={data.ajudante} onChange={(v) => setData((prev: any) => ({ ...prev, ajudante: v }))} />
           </div>
@@ -1011,12 +1023,20 @@ function CadastroView({
               </div>
               <h2 className="text-base font-black uppercase tracking-tighter">Notas Fiscais</h2>
             </div>
-            <button 
-              onClick={addNF}
-              className="flex items-center gap-2 bg-white text-stone-900 px-5 py-2.5 rounded-xl hover:bg-stone-100 transition-all text-[10px] font-black uppercase tracking-widest shadow-sm"
-            >
-              <Plus size={14} /> Adicionar NF
-            </button>
+             <div className="flex items-center gap-3">
+              <button 
+                onClick={() => setScannerActive(true)}
+                className="flex items-center gap-2 bg-stone-800 text-white px-5 py-2.5 rounded-xl hover:bg-stone-700 transition-all text-[10px] font-black uppercase tracking-widest shadow-sm"
+              >
+                <Camera size={14} /> Escanear NF
+              </button>
+              <button 
+                onClick={addNF}
+                className="flex items-center gap-2 bg-white text-stone-900 px-5 py-2.5 rounded-xl hover:bg-stone-100 transition-all text-[10px] font-black uppercase tracking-widest shadow-sm"
+              >
+                <Plus size={14} /> Adicionar NF
+              </button>
+            </div>
           </div>
 
           <div className="p-8 space-y-8">
@@ -1167,7 +1187,10 @@ function CadastroView({
           )}
           <div className="flex items-center gap-4 ml-auto">
             <button
-              onClick={() => setData(INITIAL_FORM_DATA)}
+              onClick={() => {
+                setData(INITIAL_FORM_DATA);
+                sigCanvas.current?.clear();
+              }}
               className="px-8 py-4 rounded-2xl font-black text-xs uppercase tracking-widest text-stone-400 hover:text-stone-600 hover:bg-stone-100 transition-all"
             >
               Limpar Tudo
@@ -1222,10 +1245,95 @@ function CadastroView({
             </button>
           </div>
         </div>
-      </div>
-    </div>
-  );
-}
+        </div>
+ 
+       {/* Scanner Modal */}
+       <AnimatePresence>
+         {isScannerActive && (
+           <div className="fixed inset-0 z-[200] flex items-center justify-center bg-stone-900/90 backdrop-blur-md p-4">
+             <motion.div 
+               initial={{ opacity: 0, scale: 0.9 }}
+               animate={{ opacity: 1, scale: 1 }}
+               exit={{ opacity: 0, scale: 0.9 }}
+               className="bg-white rounded-[2.5rem] w-full max-w-lg overflow-hidden relative shadow-2xl"
+             >
+               <div className="bg-stone-900 p-8 text-white flex items-center justify-between">
+                 <div className="flex items-center gap-4">
+                   <div className="p-3 bg-white/10 rounded-2xl">
+                     <Camera size={24} />
+                   </div>
+                   <div>
+                     <h2 className="text-xl font-black uppercase tracking-tighter">Escanear Barcode</h2>
+                     <p className="text-stone-400 text-[10px] font-bold uppercase tracking-widest mt-1">Aponte para o código da NF-e</p>
+                   </div>
+                 </div>
+                 <button 
+                   onClick={() => setScannerActive(false)}
+                   className="p-3 bg-white/10 hover:bg-white/20 rounded-2xl transition-all"
+                 >
+                   <Plus size={24} className="rotate-45" />
+                 </button>
+               </div>
+               
+               <div className="p-8 text-center text-stone-900">
+                 <div id="reader" className="w-full rounded-2xl overflow-hidden border-2 border-stone-100 bg-stone-50 min-h-[300px] flex items-center justify-center">
+                   <Camera className="text-stone-200" size={64} />
+                 </div>
+                 
+                 <div className="mt-8 space-y-4">
+                   <div className="flex items-start gap-4 p-4 bg-emerald-50 rounded-2xl border border-emerald-100 text-left">
+                     <div className="p-2 bg-emerald-500 rounded-lg text-white mt-1">
+                       <FileText size={16} />
+                     </div>
+                     <p className="text-[10px] font-bold text-emerald-800 leading-relaxed uppercase tracking-tight">
+                       O sistema extrairá o número da nota automaticamente (chave de 44 dígitos).
+                     </p>
+                   </div>
+                 </div>
+               </div>
+ 
+               <div className="px-8 pb-10">
+                 <button 
+                   onClick={() => {
+                     const html5QrCode = new Html5QrcodeScanner("reader", { 
+                       fps: 10, 
+                       qrbox: { width: 300, height: 100 },
+                       aspectRatio: 1.0,
+                       showTorchButtonIfSupported: true,
+                       showZoomSliderIfSupported: true
+                     }, false);
+                     
+                     html5QrCode.render((decodedText) => {
+                       html5QrCode.clear();
+                       setScannerActive(false);
+                       
+                       // Processar Chave de Acesso NF-e (44 dígitos)
+                       if (decodedText.length >= 34) {
+                         const nfNumero = decodedText.substring(25, 34);
+                         const newNF: NFItem = {
+                           id: Math.random().toString(36).substr(2, 9),
+                           numero: nfNumero,
+                           expedicaoId: '',
+                         };
+                         setData((prev: any) => ({ ...prev, nfs: [...prev.nfs, newNF] }));
+                         setNotification({ message: `NF ${nfNumero} extraída com sucesso!`, type: 'success' });
+                       } else {
+                         setNotification({ message: 'Barcode inválido.', type: 'error' });
+                       }
+                     }, () => {});
+                   }}
+                   className="w-full bg-stone-900 text-white py-5 rounded-3xl font-black uppercase tracking-widest hover:bg-stone-800 transition-all shadow-xl shadow-stone-200"
+                 >
+                   Ativar Leitor
+                 </button>
+               </div>
+             </motion.div>
+           </div>
+         )}
+       </AnimatePresence>
+     </div>
+   );
+ }
 
 function ConsultaView({ 
   records, 
@@ -1361,46 +1469,61 @@ function ConsultaView({
   );
 }
 
-function InputField({ 
-  label, 
-  value, 
-  onChange, 
-  icon, 
-  type = "text", 
-  placeholder, 
-  required = false 
-}: { 
+function InputField({ label, value, onChange, placeholder, type = "text", mask }: { 
   label: string, 
   value: string, 
   onChange: (v: string) => void, 
-  icon?: React.ReactNode, 
-  type?: string, 
-  placeholder?: string, 
-  required?: boolean 
+  placeholder?: string,
+  type?: string,
+  mask?: 'placa' | 'rg'
 }) {
-  const isEmpty = required && value.trim() === '';
+  const [isInvalid, setIsInvalid] = useState(false);
+
+  const applyMask = (val: string) => {
+    let masked = val.toUpperCase();
+    if (mask === 'placa') {
+      masked = masked.replace(/[^A-Z0-9]/g, '');
+      if (masked.length > 7) masked = masked.substring(0, 7);
+      
+      // Validação Placa Brasil (Antiga: AAA9999 ou Mercosul: AAA9A99)
+      const placaRegex = /^[A-Z]{3}[0-9][A-Z0-9][0-9]{2}$/;
+      setIsInvalid(masked.length > 0 && !placaRegex.test(masked));
+    } else if (mask === 'rg') {
+      masked = masked.replace(/[^0-9X]/g, '');
+      if (masked.length > 9) masked = masked.substring(0, 9);
+      
+      // Máscara 00.000.000-0
+      let temp = masked;
+      if (temp.length > 2) temp = temp.slice(0, 2) + '.' + temp.slice(2);
+      if (temp.length > 6) temp = temp.slice(0, 6) + '.' + temp.slice(6);
+      if (temp.length > 10) temp = temp.slice(0, 10) + '-' + temp.slice(10);
+      masked = temp;
+      
+      setIsInvalid(masked.length > 0 && masked.length < 12);
+    }
+    onChange(masked);
+  };
+
   return (
-    <div className="space-y-1.5">
-      <label className="text-[10px] font-black uppercase tracking-widest text-stone-400 ml-1">
-        {label} {isEmpty && <span className="text-red-500">*</span>}
-      </label>
+    <div className="flex flex-col gap-1.5 flex-1 min-w-[200px]">
+      <label className="text-[10px] font-black text-stone-400 uppercase tracking-widest px-1">{label}</label>
       <div className="relative">
-        {icon && (
-          <div className="absolute left-4 top-1/2 -translate-y-1/2 text-stone-300">
-            {icon}
-          </div>
-        )}
-        <input
+        <input 
           type={type}
           value={value}
+          onChange={(e) => mask ? applyMask(e.target.value) : onChange(e.target.value)}
           placeholder={placeholder}
-          onChange={(e) => onChange(e.target.value)}
-          className={`w-full bg-stone-50 border rounded-2xl py-4 ${icon ? 'pl-12' : 'px-6'} pr-4 text-sm focus:ring-2 focus:ring-stone-900 transition-all ${
-            isEmpty ? 'border-amber-200 bg-amber-50/30' : 'border-transparent'
+          className={`w-full bg-stone-50/50 border rounded-2xl py-3.5 px-5 text-xs font-bold text-stone-900 focus:ring-4 focus:ring-stone-900/5 focus:border-stone-900 transition-all placeholder:text-stone-300 ${
+            isInvalid ? 'border-red-300 bg-red-50 focus:border-red-500 focus:ring-red-100' : 'border-stone-100'
           }`}
-          required={required}
         />
+        {isInvalid && (
+          <div className="absolute right-4 top-1/2 -translate-y-1/2 text-red-500">
+            <AlertCircle size={16} />
+          </div>
+        )}
       </div>
+      {isInvalid && <p className="text-[9px] text-red-500 font-bold uppercase tracking-widest px-1">Formato inválido</p>}
     </div>
   );
 }
