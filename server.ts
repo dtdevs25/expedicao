@@ -211,7 +211,7 @@ app.post('/api/records', async (req, res) => {
       attachments: [
         {
           filename: `Expedicao_${data.assinaturaDigital.codigoRastreabilidade}.pdf`,
-          content: pdfBuffer
+          content: Buffer.from(pdfBuffer)
         }
       ]
     });

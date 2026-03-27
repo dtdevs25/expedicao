@@ -4,7 +4,7 @@ import {
   ChevronLeft, Search, Eye, User, Lock, LayoutDashboard,
   ClipboardList, PlusCircle, Truck, Settings, Heart,
   RotateCcw, Wrench, ArrowLeftRight, AlertCircle, Eraser,
-  PenTool, Edit3
+  PenTool, Edit3, EyeOff
 } from 'lucide-react';
 import { motion, AnimatePresence } from 'motion/react';
 import SignatureCanvas from 'react-signature-canvas';
@@ -523,6 +523,7 @@ function LoginView({ onLogin }: { onLogin: (data: any) => void }) {
   const [error, setError] = useState('');
   const [success, setSuccess] = useState('');
   const [loading, setLoading] = useState(false);
+  const [showPassword, setShowPassword] = useState(false);
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -585,7 +586,7 @@ function LoginView({ onLogin }: { onLogin: (data: any) => void }) {
             animate={{ scale: 1, rotate: 0 }}
             transition={{ type: "spring", stiffness: 100 }}
           >
-            <BrandLogo size="lg" className="scale-125 mb-2 drop-shadow-[0_0_15px_rgba(16,185,129,0.3)]" />
+            <BrandLogo size="lg" className="mb-2 drop-shadow-[0_0_15px_rgba(16,185,129,0.3)]" />
           </motion.div>
           <h1 className="mt-6 text-2xl font-black tracking-tighter uppercase">
             {isResetMode ? 'Recuperar Acesso' : 'Acesso ao Sistema'}
@@ -653,13 +654,20 @@ function LoginView({ onLogin }: { onLogin: (data: any) => void }) {
               <div className="relative">
                 <Lock className="absolute left-4 top-1/2 -translate-y-1/2 text-stone-400" size={18} />
                 <input
-                  type="password"
-                  placeholder="Senha"
+                  type={showPassword ? "text" : "password"}
+                  placeholder="Sua Senha"
                   value={password}
                   onChange={(e) => setPassword(e.target.value)}
-                  className="w-full bg-stone-50 border-none rounded-2xl py-4 pl-12 pr-4 text-sm focus:ring-2 focus:ring-stone-900 transition-all"
+                  className="w-full bg-stone-50 border-none rounded-2xl py-4 pl-12 pr-12 text-sm focus:ring-2 focus:ring-stone-900 transition-all font-sans"
                   required
                 />
+                <button
+                  type="button"
+                  onClick={() => setShowPassword(!showPassword)}
+                  className="absolute right-4 top-1/2 -translate-y-1/2 text-stone-400 hover:text-stone-900 transition-colors"
+                >
+                  {showPassword ? <EyeOff size={18} /> : <Eye size={18} />}
+                </button>
               </div>
             </div>
 
@@ -1392,120 +1400,120 @@ function DocumentPreview({ data }: { data: RegistroExpedicao }) {
 
       <div className="w-full overflow-x-auto pb-10 flex justify-start lg:justify-center px-4 md:px-0">
         <div className="document-page bg-white p-8 md:p-16 shadow-2xl border border-stone-200 relative text-black font-sans shrink-0" style={{ width: '210mm', minHeight: '297mm' }}>
-        {/* Header */}
-        <div className="flex flex-col items-center mb-12">
-          <BrandLogo size="lg" className="mb-6 brightness-0" />
-          <h1 className="text-xl font-bold uppercase tracking-tight">REGISTRO DE EXPEDIÇÃO</h1>
-        </div>
+          {/* Header */}
+          <div className="flex flex-col items-center mb-12">
+            <BrandLogo size="lg" className="mb-6 brightness-0" />
+            <h1 className="text-xl font-bold uppercase tracking-tight">REGISTRO DE EXPEDIÇÃO</h1>
+          </div>
 
-        {/* Fields */}
-        <div className="space-y-0 text-sm">
-          <div className="flex items-center py-2 border-b border-stone-300">
-            <span className="font-bold w-64 uppercase">RESPONSÁVEL EXPEDIÇÃO:</span>
-            <span className="uppercase">{data.responsavel}</span>
-          </div>
-          <div className="flex items-center py-2 border-b border-stone-300">
-            <span className="font-bold w-64 uppercase">DATA/HORA DA SAÍDA DA EXPEDIÇÃO:</span>
-            <span className="uppercase">{data.dataSaida}</span>
-          </div>
-          <div className="flex items-center py-2 border-b border-stone-300">
-            <span className="font-bold w-64 uppercase">CLIENTE:</span>
-            <span className="uppercase">{data.cliente}</span>
-          </div>
-          <div className="flex items-center py-2 border-b border-stone-300">
-            <span className="font-bold w-64 uppercase">DESTINO:</span>
-            <span className="uppercase">{data.destino}</span>
-          </div>
-          <div className="flex flex-col py-2 border-b border-stone-300">
-            <span className="font-bold uppercase mb-2">NF / ID EXPEDIÇÃO:</span>
-            <div className="border border-stone-300 rounded-sm overflow-hidden">
-              <table className="w-full text-[10px] border-collapse">
-                <thead>
-                  <tr className="bg-stone-50 border-b border-stone-300">
-                    <th className="py-1 px-3 text-left border-r border-stone-300 font-bold uppercase">Nota Fiscal</th>
-                    <th className="py-1 px-3 text-left font-bold uppercase">ID Expedição</th>
-                  </tr>
-                </thead>
-                <tbody>
-                  {data.nfs.map((nf, i) => (
-                    <tr key={i} className="border-b border-stone-200 last:border-0">
-                      <td className="py-1 px-3 border-r border-stone-300 uppercase">{nf.numero || '---'}</td>
-                      <td className="py-1 px-3 uppercase">{nf.expedicaoId || '---'}</td>
+          {/* Fields */}
+          <div className="space-y-0 text-sm">
+            <div className="flex items-center py-2 border-b border-stone-300">
+              <span className="font-bold w-64 uppercase">RESPONSÁVEL EXPEDIÇÃO:</span>
+              <span className="uppercase">{data.responsavel}</span>
+            </div>
+            <div className="flex items-center py-2 border-b border-stone-300">
+              <span className="font-bold w-64 uppercase">DATA/HORA DA SAÍDA DA EXPEDIÇÃO:</span>
+              <span className="uppercase">{data.dataSaida}</span>
+            </div>
+            <div className="flex items-center py-2 border-b border-stone-300">
+              <span className="font-bold w-64 uppercase">CLIENTE:</span>
+              <span className="uppercase">{data.cliente}</span>
+            </div>
+            <div className="flex items-center py-2 border-b border-stone-300">
+              <span className="font-bold w-64 uppercase">DESTINO:</span>
+              <span className="uppercase">{data.destino}</span>
+            </div>
+            <div className="flex flex-col py-2 border-b border-stone-300">
+              <span className="font-bold uppercase mb-2">NF / ID EXPEDIÇÃO:</span>
+              <div className="border border-stone-300 rounded-sm overflow-hidden">
+                <table className="w-full text-[10px] border-collapse">
+                  <thead>
+                    <tr className="bg-stone-50 border-b border-stone-300">
+                      <th className="py-1 px-3 text-left border-r border-stone-300 font-bold uppercase">Nota Fiscal</th>
+                      <th className="py-1 px-3 text-left font-bold uppercase">ID Expedição</th>
                     </tr>
-                  ))}
-                </tbody>
-              </table>
+                  </thead>
+                  <tbody>
+                    {data.nfs.map((nf, i) => (
+                      <tr key={i} className="border-b border-stone-200 last:border-0">
+                        <td className="py-1 px-3 border-r border-stone-300 uppercase">{nf.numero || '---'}</td>
+                        <td className="py-1 px-3 uppercase">{nf.expedicaoId || '---'}</td>
+                      </tr>
+                    ))}
+                  </tbody>
+                </table>
+              </div>
             </div>
           </div>
-        </div>
 
-        {/* Natureza */}
-        <div className="mt-8 mb-8">
-          <h3 className="font-bold text-sm uppercase mb-4">NATUREZA DA OPERAÇÃO:</h3>
-          <div className="space-y-2">
-            {NATUREZAS.map(n => (
-              <div key={n} className="flex items-center gap-3">
-                <div className={`w-4 h-4 rounded-full border border-stone-400 flex items-center justify-center`}>
-                  {data.natureza === n && <div className="w-2.5 h-2.5 bg-blue-600 rounded-full"></div>}
-                </div>
-                <span className="text-xs uppercase">{n}</span>
-              </div>
-            ))}
-          </div>
-        </div>
-
-        {/* Logistics */}
-        <div className="space-y-0 text-sm">
-          <div className="flex items-center py-2 border-b border-stone-300">
-            <span className="font-bold w-64 uppercase">VOLUMES:</span>
-            <span className="uppercase">{data.volumes}</span>
-          </div>
-          <div className="flex items-center py-2 border-b border-stone-300">
-            <span className="font-bold w-64 uppercase">TRANSPORTADORA:</span>
-            <span className="uppercase">{data.transportadora}</span>
-          </div>
-          <div className="flex items-center py-2 border-b border-stone-300">
-            <span className="font-bold w-64 uppercase">MOTORISTA:</span>
-            <span className="uppercase">{data.motorista}</span>
-          </div>
-          <div className="flex items-center py-2 border-b border-stone-300">
-            <span className="font-bold w-64 uppercase">RG/CPF:</span>
-            <span className="uppercase">{data.rgCpf}</span>
-          </div>
-          <div className="flex items-center py-2 border-b border-stone-300">
-            <span className="font-bold w-64 uppercase">PLACA DO VEICULO:</span>
-            <span className="uppercase">{data.placaVeiculo}</span>
-          </div>
-          <div className="flex items-center py-2 border-b border-stone-300">
-            <span className="font-bold w-64 uppercase">AJUDANTE:</span>
-            <span className="uppercase">{data.ajudante || 'Sem ajudante'}</span>
-          </div>
-        <div className="flex items-start py-2 border-b border-stone-300 min-h-[110px]">
-          <span className="font-bold w-32 uppercase">ASSINATURA:</span>
-          <div className="flex-1 flex flex-col items-start -mt-2">
-             {/* Signature Display */}
-             <div className="w-72 h-24 relative">
-                {data.signatureImage ? (
-                  <img src={data.signatureImage} alt="Assinatura" className="w-full h-full object-contain object-center" />
-                ) : (
-                  <div className="absolute inset-0 flex items-center justify-center opacity-10">
-                     <FileText size={40} />
+          {/* Natureza */}
+          <div className="mt-8 mb-8">
+            <h3 className="font-bold text-sm uppercase mb-4">NATUREZA DA OPERAÇÃO:</h3>
+            <div className="space-y-2">
+              {NATUREZAS.map(n => (
+                <div key={n} className="flex items-center gap-3">
+                  <div className={`w-4 h-4 rounded-full border border-stone-400 flex items-center justify-center`}>
+                    {data.natureza === n && <div className="w-2.5 h-2.5 bg-blue-600 rounded-full"></div>}
                   </div>
-                )}
-             </div>
-             <div className="w-72 border-b border-stone-400 mb-2"></div>
-             <div className="text-[9px] text-stone-600 text-left space-y-1">
-                <p className="font-bold uppercase">DOCUMENTO ASSINADO DIGITALMENTE POR: {data.assinaturaDigital.nome}</p>
-                <p className="uppercase">DATA E HORA DA ASSINATURA: {data.assinaturaDigital.dataHora}</p>
-                <p className="uppercase">CÓDIGO ÚNICO DE RASTREABILIDADE (ID): {data.assinaturaDigital.codigoRastreabilidade}</p>
-             </div>
+                  <span className="text-xs uppercase">{n}</span>
+                </div>
+              ))}
+            </div>
           </div>
-        </div>
-        </div>
 
-        {/* Footer */}
-        <div className="absolute bottom-12 left-16 text-[10px] text-stone-500">
-          CTDI F-5000195 / 2
+          {/* Logistics */}
+          <div className="space-y-0 text-sm">
+            <div className="flex items-center py-2 border-b border-stone-300">
+              <span className="font-bold w-64 uppercase">VOLUMES:</span>
+              <span className="uppercase">{data.volumes}</span>
+            </div>
+            <div className="flex items-center py-2 border-b border-stone-300">
+              <span className="font-bold w-64 uppercase">TRANSPORTADORA:</span>
+              <span className="uppercase">{data.transportadora}</span>
+            </div>
+            <div className="flex items-center py-2 border-b border-stone-300">
+              <span className="font-bold w-64 uppercase">MOTORISTA:</span>
+              <span className="uppercase">{data.motorista}</span>
+            </div>
+            <div className="flex items-center py-2 border-b border-stone-300">
+              <span className="font-bold w-64 uppercase">RG/CPF:</span>
+              <span className="uppercase">{data.rgCpf}</span>
+            </div>
+            <div className="flex items-center py-2 border-b border-stone-300">
+              <span className="font-bold w-64 uppercase">PLACA DO VEICULO:</span>
+              <span className="uppercase">{data.placaVeiculo}</span>
+            </div>
+            <div className="flex items-center py-2 border-b border-stone-300">
+              <span className="font-bold w-64 uppercase">AJUDANTE:</span>
+              <span className="uppercase">{data.ajudante || 'Sem ajudante'}</span>
+            </div>
+            <div className="flex items-start py-2 border-b border-stone-300 min-h-[110px]">
+              <span className="font-bold w-32 uppercase">ASSINATURA:</span>
+              <div className="flex-1 flex flex-col items-start -mt-2">
+                <div className="w-72 h-24 relative">
+                  {data.signatureImage ? (
+                    <img src={data.signatureImage} alt="Assinatura" className="w-full h-full object-contain object-center" />
+                  ) : (
+                    <div className="absolute inset-0 flex items-center justify-center opacity-10">
+                      <FileText size={40} />
+                    </div>
+                  )}
+                </div>
+                <div className="w-72 border-b border-stone-400 mb-2"></div>
+                <div className="text-[9px] text-stone-600 text-left space-y-1">
+                  <p className="font-bold uppercase">DOCUMENTO ASSINADO DIGITALMENTE POR: {data.assinaturaDigital.nome}</p>
+                  <p className="uppercase">DATA E HORA DA ASSINATURA: {data.assinaturaDigital.dataHora}</p>
+                  <p className="uppercase">CÓDIGO ÚNICO DE RASTREABILIDADE (ID): {data.assinaturaDigital.codigoRastreabilidade}</p>
+                </div>
+              </div>
+            </div>
+          </div>
+
+          {/* Footer */}
+          <div className="absolute bottom-12 left-16 text-[10px] text-stone-500">
+            CTDI F-5000195 / 2
+          </div>
         </div>
       </div>
     </div>
