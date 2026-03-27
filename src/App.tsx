@@ -239,7 +239,8 @@ export default function App() {
   }
 
   if (!user) {
-    return <LoginView onLogin={(userData: any) => {
+    return <LoginView onLogin={(data: any) => {
+      const userData = { token: data.token, ...data.user };
       setUser(userData);
       localStorage.setItem('ctdi_user', JSON.stringify(userData));
       if (!userData.mustChangePassword) {
@@ -251,11 +252,11 @@ export default function App() {
   if (user.mustChangePassword) {
     return <ChangePasswordView 
       token={user.token} 
-      onComplete={(newToken) => {
-        const updatedUser = { ...user, token: newToken, mustChangePassword: false };
+      onComplete={(token) => {
+        const updatedUser = { ...user, token, mustChangePassword: false };
         setUser(updatedUser);
         localStorage.setItem('ctdi_user', JSON.stringify(updatedUser));
-        fetchRecords(newToken);
+        fetchRecords(token);
       }} 
     />;
   }
