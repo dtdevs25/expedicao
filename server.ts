@@ -157,6 +157,7 @@ app.get('/api/records', async (req, res) => {
 // Create new record
 app.post('/api/records', async (req, res) => {
   const { signatureImage, ...data } = req.body;
+  const userEmail = (req as any).user?.email; // Email do usuário logado
 
   try {
     // 1. Save to DB
@@ -186,35 +187,43 @@ app.post('/api/records', async (req, res) => {
       include: { notasFiscais: true }
     });
 
-    // 2. Generate PDF using Puppeteer
-    const pdfBuffer = await generatePDF(data, signatureImage);
+    // 2. Generate PDF (non-blocking — if it fails, record is still saved)
+    try {
+      const pdfBuffer = await generatePDF(data, signatureImage);
 
-    const transporter = nodemailer.createTransport({
-      host: process.env.SMTP_HOST,
-      port: parseInt(process.env.SMTP_PORT || '587'),
-      secure: false,
-      auth: {
-        user: process.env.SMTP_USER,
-        pass: process.env.SMTP_PASS,
-      },
-      tls: {
-        rejectUnauthorized: false
-      }
-    });
-
-    // 3. Send Email
-    await transporter.sendMail({
-      from: `"Expedição CTDI" <${process.env.SMTP_USER}>`,
-      to: process.env.SMTP_USER, // Para si mesmo ou destinatário fixo
-      subject: `Novo Documento de Expedição - ${data.cliente} - ${data.assinaturaDigital.codigoRastreabilidade}`,
-      text: `Segue em anexo o documento de expedição de ${data.cliente}.`,
-      attachments: [
-        {
-          filename: `Expedicao_${data.assinaturaDigital.codigoRastreabilidade}.pdf`,
-          content: Buffer.from(pdfBuffer)
-        }
-      ]
-    });
+      // 3. Send Email to the user who created the record
+      const recipient = userEmail || process.env.SMTP_USER;
+      await transporter.sendMail({
+        from: `"Expedição CTDI" <${process.env.SMTP_USER}>`,
+        to: recipient,
+        subject: `Expedição Concluída - ${data.cliente} [${data.assinaturaDigital.codigoRastreabilidade}]`,
+        html: `
+          <div style="font-family: Arial, sans-serif; padding: 24px; color: #333; max-width: 600px;">
+            <div style="background: #003366; color: white; padding: 20px; border-radius: 8px; margin-bottom: 24px;">
+              <h2 style="margin: 0; font-size: 18px;">✅ Documento de Expedição Gerado</h2>
+            </div>
+            <p>Olá <b>${data.responsavel}</b>,</p>
+            <p>O documento de expedição abaixo foi concluído e está em anexo neste e-mail.</p>
+            <table style="width: 100%; border-collapse: collapse; margin: 16px 0;">
+              <tr><td style="padding: 8px; font-weight: bold; color: #666; font-size: 11px; text-transform: uppercase;">Cliente</td><td style="padding: 8px;">${data.cliente}</td></tr>
+              <tr style="background:#f9f9f9"><td style="padding: 8px; font-weight: bold; color: #666; font-size: 11px; text-transform: uppercase;">Destino</td><td style="padding: 8px;">${data.destino}</td></tr>
+              <tr><td style="padding: 8px; font-weight: bold; color: #666; font-size: 11px; text-transform: uppercase;">Motorista</td><td style="padding: 8px;">${data.motorista}</td></tr>
+              <tr style="background:#f9f9f9"><td style="padding: 8px; font-weight: bold; color: #666; font-size: 11px; text-transform: uppercase;">Código</td><td style="padding: 8px; font-family: monospace;">${data.assinaturaDigital.codigoRastreabilidade}</td></tr>
+            </table>
+            <hr style="border: none; border-top: 1px solid #eee;" />
+            <p style="font-size: 11px; color: #999;">CTDI Sistema de Expedição — documento gerado automaticamente.</p>
+          </div>
+        `,
+        attachments: [
+          {
+            filename: `Expedicao_${data.assinaturaDigital.codigoRastreabilidade}.pdf`,
+            content: Buffer.from(pdfBuffer)
+          }
+        ]
+      });
+    } catch (emailErr) {
+      console.error('Email/PDF generation failed (record still saved):', emailErr);
+    }
 
     res.status(201).json(newRecord);
   } catch (error) {
@@ -240,8 +249,8 @@ app.delete('/api/records/:id', async (req, res) => {
 // PDF Generation Helper
 async function generatePDF(data: any, signatureImage: string) {
   const browser = await puppeteer.launch({
-    args: ['--no-sandbox', '--disable-setuid-sandbox'],
-    executablePath: process.env.PUPPETEER_EXECUTABLE_PATH || undefined,
+    args: ['--no-sandbox', '--disable-setuid-sandbox', '--disable-dev-shm-usage'],
+    executablePath: process.env.PUPPETEER_EXECUTABLE_PATH || '/usr/bin/chromium' || '/usr/bin/chromium-browser' || undefined,
   });
   const page = await browser.newPage();
   

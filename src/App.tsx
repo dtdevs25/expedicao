@@ -1348,7 +1348,7 @@ function CadastroView({
               }`}
             >
               <PlusCircle size={22} className={isFormValid ? "group-hover:rotate-90 transition-transform" : ""} />
-              Gerar Documento
+              Concluir
             </button>
           </div>
         </div>
