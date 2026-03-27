@@ -21,6 +21,15 @@ const NATUREZAS: NaturezaOperacao[] = [
   'TRANSFERENCIA',
 ];
 
+const natureIcons: Record<NaturezaOperacao, any> = {
+  'VENDA': Truck,
+  'OUTROS': Settings,
+  'DOAÇÃO / DEMONSTRAÇÃO': Heart,
+  'RETORNO DE REPARO': RotateCcw,
+  'REMESSA PARA REPARO': Wrench,
+  'TRANSFERENCIA': ArrowLeftRight,
+};
+
 const INITIAL_FORM_DATA: RegistroExpedicao = {
   responsavel: '',
   dataSaida: '',

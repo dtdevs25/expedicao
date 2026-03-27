@@ -29,9 +29,11 @@ ENV PUPPETEER_SKIP_CHROMIUM_DOWNLOAD=true
 ENV PUPPETEER_EXECUTABLE_PATH=/usr/bin/chromium
 
 # Puppeteer and Prisma dependencies for Linux
-RUN apt-get update && apt-get install -y \
+RUN apt-get clean && apt-get update || true && \
+    apt-get install -y --no-install-recommends ca-certificates && \
+    apt-get update && \
+    apt-get install -y \
     openssl \
-    ca-certificates \
     fonts-liberation \
     libasound2 \
     libatk-bridge2.0-0 \
