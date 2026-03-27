@@ -295,13 +295,6 @@ export default function App() {
       {/* Header — fixed, full-width */}
       <header className="no-print fixed top-0 left-0 right-0 h-20 bg-white border-b border-stone-100 px-6 lg:px-10 flex items-center justify-between z-[70] shadow-sm">
         <div className="flex items-center gap-4">
-          <button 
-            onClick={() => setIsSidebarOpen(!isSidebarOpen)}
-            className="p-2.5 hover:bg-stone-100 rounded-xl transition-all active:scale-95 text-stone-400 hover:text-stone-900"
-          >
-            <Menu size={22} />
-          </button>
-          
           <div className="text-stone-900 transition-transform hover:scale-105 cursor-pointer flex items-center justify-center">
             <BrandLogo size="md" className="brightness-0" />
           </div>
@@ -444,16 +437,16 @@ export default function App() {
           </div>
         </aside>
 
-        {/* Sidebar Toggle — chevron on the right edge of sidebar, below header */}
+        {/* Sidebar Toggle — chevron near the header, on the sidebar divider */}
         <button
           onClick={() => setIsSidebarOpen(!isSidebarOpen)}
           className={`
-            hidden lg:flex fixed top-[calc(50vh+2.5rem)] -translate-y-1/2 z-[61]
-            items-center justify-center w-5 h-10
+            lg:flex fixed top-28 z-[61]
+            items-center justify-center w-6 h-10
             bg-white border border-stone-200 rounded-r-lg
             text-stone-400 hover:text-[#003366] hover:border-[#003366]/30
             transition-all duration-300 shadow-sm hover:shadow-md
-            ${isSidebarOpen ? 'left-64' : 'left-[4.5rem]'}
+            ${isSidebarOpen ? 'left-64 flex' : 'left-[4.5rem] flex'}
           `}
           title={isSidebarOpen ? 'Recolher menu' : 'Expandir menu'}
         >
