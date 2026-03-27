@@ -263,21 +263,32 @@ export default function App() {
 
   return (
     <div className="h-screen bg-stone-50 flex flex-col font-sans text-stone-900 overflow-hidden">
+      {/* Sidebar Overlay (Mobile only) */}
+      {isSidebarOpen && (
+        <div 
+          className="lg:hidden fixed inset-0 bg-stone-900/40 backdrop-blur-sm z-50 animate-fade-in"
+          onClick={() => setIsSidebarOpen(false)}
+        />
+      )}
+
       {/* Header */}
-      <header className="no-print h-16 bg-white border-b border-stone-200 px-6 flex items-center justify-between shrink-0 z-50 shadow-sm">
-        <div className="flex items-center gap-4">
+      <header className="no-print h-16 bg-white border-b border-stone-200 px-4 lg:px-6 flex items-center justify-between shrink-0 z-50 shadow-sm relative">
+        <div className="flex items-center gap-2 lg:gap-4">
           <button 
             onClick={() => setIsSidebarOpen(!isSidebarOpen)}
-            className="p-2 hover:bg-stone-100 rounded-lg transition-colors"
+            className="p-2 hover:bg-stone-100 rounded-lg transition-colors active:scale-90"
           >
             <Menu size={20} />
           </button>
-          <div className="text-stone-900 scale-110 origin-left">
-            <BrandLogo size="sm" className="brightness-0" />
+          
+          <div className="flex items-center gap-3">
+            <div className="text-stone-900 scale-[1.3] origin-left transition-transform hover:scale-[1.35]">
+              <BrandLogo size="sm" className="brightness-0" />
+            </div>
+            <h2 className="text-sm lg:text-base font-black tracking-tighter uppercase hidden sm:block">
+              Expedição <span className="text-emerald-600">CTDI</span>
+            </h2>
           </div>
-          <span className="hidden md:block font-bold text-stone-400 text-xs uppercase tracking-widest ml-2">
-            Sistema de Expedição
-          </span>
         </div>
         
         <div className="flex items-center gap-4">
@@ -352,7 +363,12 @@ export default function App() {
 
         {/* Sidebar */}
         <aside 
-          className={`no-print bg-white border-r border-stone-200 transition-all duration-300 ease-in-out flex flex-col ${isSidebarOpen ? 'w-64' : 'w-20'}`}
+          className={`
+            fixed lg:relative inset-y-0 left-0 w-72 bg-white border-r border-stone-200 shadow-xl 
+            lg:shadow-none z-[60] lg:z-0 transform transition-transform duration-300 ease-in-out
+            ${isSidebarOpen ? 'translate-x-0' : '-translate-x-full'}
+            lg:translate-x-0 ${!isSidebarOpen && 'lg:hidden'}
+          `}
         >
           <nav className="flex-1 py-6 px-3 space-y-2">
             <SidebarItem 
@@ -563,8 +579,14 @@ function LoginView({ onLogin }: { onLogin: (data: any) => void }) {
         animate={{ opacity: 1, y: 0 }}
         className="bg-white w-full max-w-md rounded-3xl shadow-2xl overflow-hidden"
       >
-        <div className="bg-stone-900 p-12 flex flex-col items-center text-white">
-          <BrandLogo size="lg" />
+        <div className="bg-stone-900 p-16 flex flex-col items-center text-white relative overflow-hidden">
+          <motion.div 
+            initial={{ scale: 0.8, rotate: -5 }}
+            animate={{ scale: 1, rotate: 0 }}
+            transition={{ type: "spring", stiffness: 100 }}
+          >
+            <BrandLogo size="lg" className="scale-125 mb-2 drop-shadow-[0_0_15px_rgba(16,185,129,0.3)]" />
+          </motion.div>
           <h1 className="mt-6 text-2xl font-black tracking-tighter uppercase">
             {isResetMode ? 'Recuperar Acesso' : 'Acesso ao Sistema'}
           </h1>
@@ -942,12 +964,12 @@ function CadastroView({
           </div>
           
           <div className="space-y-5">
-            <div className="grid grid-cols-2 gap-4">
+            <div className="grid grid-cols-1 sm:grid-cols-2 gap-5">
               <InputField label="Volumes" value={data.volumes} onChange={(v) => setData((prev: any) => ({ ...prev, volumes: v }))} />
               <InputField label="Placa do Veículo" value={data.placaVeiculo} onChange={(v) => setData((prev: any) => ({ ...prev, placaVeiculo: v }))} />
             </div>
             <InputField label="Transportadora" value={data.transportadora} onChange={(v) => setData((prev: any) => ({ ...prev, transportadora: v }))} />
-            <div className="grid grid-cols-2 gap-4">
+            <div className="grid grid-cols-1 sm:grid-cols-2 gap-5">
               <InputField label="Motorista" value={data.motorista} onChange={(v) => setData((prev: any) => ({ ...prev, motorista: v }))} />
               <InputField label="RG/CPF" value={data.rgCpf} onChange={(v) => setData((prev: any) => ({ ...prev, rgCpf: v }))} />
             </div>
@@ -1083,7 +1105,7 @@ function CadastroView({
             </button>
           </div>
 
-          <div className="border-2 border-dashed border-stone-200 rounded-3xl overflow-hidden bg-stone-50 h-48 relative">
+          <div className="border-2 border-dashed border-stone-200 rounded-3xl overflow-hidden bg-stone-50 h-48 relative touch-none">
             <SignatureCanvas 
               ref={sigCanvas}
               penColor="black"
@@ -1212,7 +1234,8 @@ function ConsultaView({
         </div>
       </div>
 
-      <div className="bg-white rounded-3xl shadow-sm border border-stone-100 overflow-hidden">
+      {/* Desktop Table View */}
+      <div className="hidden lg:block bg-white rounded-3xl shadow-sm border border-stone-100 overflow-hidden">
         <table className="w-full text-left border-collapse">
           <thead>
             <tr className="bg-stone-50 border-b border-stone-100">
@@ -1238,41 +1261,71 @@ function ConsultaView({
                 </td>
                 <td className="px-6 py-4 text-right">
                   <div className="flex items-center justify-end gap-2">
-                    <button 
-                      onClick={() => onView(record)}
-                      className="p-2 text-stone-400 hover:text-stone-900 hover:bg-stone-100 rounded-lg transition-all"
-                      title="Visualizar"
-                    >
-                      <Eye size={18} />
-                    </button>
-                    <button 
-                      onClick={() => onEdit(record)}
-                      className="p-2 text-stone-400 hover:text-blue-600 hover:bg-blue-50 rounded-lg transition-all"
-                      title="Editar"
-                    >
-                      <Edit3 size={18} />
-                    </button>
-                    <button 
-                      onClick={() => onDelete(record.assinaturaDigital.codigoRastreabilidade)}
-                      className="p-2 text-stone-400 hover:text-red-600 hover:bg-red-50 rounded-lg transition-all"
-                      title="Excluir"
-                    >
-                      <Trash2 size={18} />
-                    </button>
+                    <button onClick={() => onView(record)} className="p-2 text-stone-400 hover:text-stone-900 hover:bg-stone-100 rounded-lg transition-all"><Eye size={18} /></button>
+                    <button onClick={() => onEdit(record)} className="p-2 text-stone-400 hover:text-blue-600 hover:bg-blue-50 rounded-lg transition-all"><Edit3 size={18} /></button>
+                    <button onClick={() => onDelete(record.assinaturaDigital.codigoRastreabilidade)} className="p-2 text-stone-400 hover:text-red-600 hover:bg-red-50 rounded-lg transition-all"><Trash2 size={18} /></button>
                   </div>
                 </td>
               </tr>
             ))}
-            {filtered.length === 0 && (
-              <tr>
-                <td colSpan={6} className="px-6 py-12 text-center text-stone-400 text-sm italic">
-                  Nenhum registro encontrado.
-                </td>
-              </tr>
-            )}
           </tbody>
         </table>
       </div>
+
+      {/* Mobile Card View */}
+      <div className="lg:hidden space-y-4 pb-20">
+        {filtered.map((record, i) => (
+          <div key={i} className="bg-white p-6 rounded-3xl border border-stone-100 shadow-sm space-y-4">
+            <div className="flex justify-between items-start">
+              <div>
+                <p className="text-[10px] font-black text-stone-400 uppercase tracking-widest mb-1">{record.dataSaida}</p>
+                <h3 className="text-sm font-black text-stone-900 uppercase leading-none">{record.cliente}</h3>
+              </div>
+              <span className="px-2 py-1 bg-stone-100 rounded text-[8px] font-black uppercase tracking-tighter text-stone-600">
+                {record.natureza}
+              </span>
+            </div>
+            
+            <div className="grid grid-cols-2 gap-4 text-[10px] font-bold text-stone-500 uppercase tracking-tight">
+              <div>
+                <span className="block text-stone-400 mb-0.5">Destino:</span>
+                {record.destino}
+              </div>
+              <div>
+                <span className="block text-stone-400 mb-0.5">Motorista:</span>
+                {record.motorista}
+              </div>
+            </div>
+
+            <div className="flex items-center gap-2 pt-4 border-t border-stone-50">
+              <button 
+                onClick={() => onView(record)} 
+                className="flex-1 bg-stone-50 text-stone-900 py-3 rounded-xl flex items-center justify-center gap-2 font-black text-[10px] uppercase tracking-widest active:scale-95 transition-all"
+              >
+                <Eye size={14} /> Ver
+              </button>
+              <button 
+                onClick={() => onEdit(record)} 
+                className="flex-1 bg-blue-50 text-blue-600 py-3 rounded-xl flex items-center justify-center gap-2 font-black text-[10px] uppercase tracking-widest active:scale-95 transition-all"
+              >
+                <Edit3 size={14} /> Editar
+              </button>
+              <button 
+                onClick={() => onDelete(record.assinaturaDigital.codigoRastreabilidade)} 
+                className="p-3 bg-red-50 text-red-600 rounded-xl active:scale-90 transition-all font-black"
+              >
+                <Trash2 size={16} />
+              </button>
+            </div>
+          </div>
+        ))}
+      </div>
+
+      {filtered.length === 0 && (
+        <div className="bg-white rounded-3xl p-20 border border-dashed border-stone-200 text-center">
+          <p className="text-stone-400 text-sm font-bold uppercase tracking-widest">Nenhum registro encontrado</p>
+        </div>
+      )}
     </div>
   );
 }
@@ -1337,7 +1390,8 @@ function DocumentPreview({ data }: { data: RegistroExpedicao }) {
         <Printer size={24} className="group-hover:rotate-12 transition-transform" />
       </button>
 
-      <div className="document-page mx-auto bg-white p-16 shadow-2xl border border-stone-200 relative text-black font-sans" style={{ width: '210mm', minHeight: '297mm' }}>
+      <div className="w-full overflow-x-auto pb-10 flex justify-start lg:justify-center px-4 md:px-0">
+        <div className="document-page bg-white p-8 md:p-16 shadow-2xl border border-stone-200 relative text-black font-sans shrink-0" style={{ width: '210mm', minHeight: '297mm' }}>
         {/* Header */}
         <div className="flex flex-col items-center mb-12">
           <BrandLogo size="lg" className="mb-6 brightness-0" />
