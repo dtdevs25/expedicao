@@ -8,8 +8,9 @@ COPY . .
 RUN npx prisma generate
 RUN npm run build
 
-# Production stage
-FROM node:20-slim
+# Production stage — use full node:20 image which already includes openssl
+# This avoids apt-get GPG signature issues on the build server
+FROM node:20
 WORKDIR /app
 COPY package*.json ./
 RUN npm install --production
@@ -21,9 +22,6 @@ COPY prisma ./prisma/
 COPY tsconfig.json ./
 
 RUN npm install -g tsx
-
-# Only install what's actually needed: openssl for Prisma
-RUN apt-get update && apt-get install -y openssl --no-install-recommends && rm -rf /var/lib/apt/lists/*
 
 EXPOSE 3000
 
