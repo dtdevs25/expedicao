@@ -580,18 +580,18 @@ function LoginView({ onLogin }: { onLogin: (data: any) => void }) {
         animate={{ opacity: 1, y: 0 }}
         className="bg-white w-full max-w-md rounded-3xl shadow-2xl overflow-hidden"
       >
-        <div className="bg-stone-900 p-16 flex flex-col items-center text-white relative overflow-hidden">
+        <div className="bg-stone-900 py-10 px-6 flex flex-col items-center text-white relative overflow-hidden">
           <motion.div 
             initial={{ scale: 0.8, rotate: -5 }}
             animate={{ scale: 1, rotate: 0 }}
             transition={{ type: "spring", stiffness: 100 }}
           >
-            <BrandLogo size="lg" className="mb-2 drop-shadow-[0_0_15px_rgba(16,185,129,0.3)]" />
+            <BrandLogo size="md" className="mb-2 drop-shadow-[0_0_15px_rgba(16,185,129,0.3)]" />
           </motion.div>
-          <h1 className="mt-6 text-2xl font-black tracking-tighter uppercase">
+          <h1 className="mt-4 text-xl font-black tracking-tighter uppercase">
             {isResetMode ? 'Recuperar Acesso' : 'Acesso ao Sistema'}
           </h1>
-          <p className="text-stone-400 text-xs font-bold tracking-widest uppercase mt-2">Controle de Expedição</p>
+          <p className="text-stone-400 text-[10px] font-bold tracking-widest uppercase mt-1">Controle de Expedição</p>
         </div>
         
         {isResetMode ? (
