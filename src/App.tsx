@@ -392,10 +392,10 @@ export default function App() {
         {/* Sidebar */}
         <aside 
           className={`
-            fixed lg:sticky inset-y-0 left-0 bg-white border-r border-stone-100 z-[60]
-            transition-all duration-300 ease-in-out flex flex-col
+            fixed inset-y-0 left-0 bg-stone-950 text-white z-[60]
+            transition-all duration-300 ease-in-out flex flex-col border-r border-stone-800
             ${isSidebarOpen 
-              ? 'w-72 translate-x-0 shadow-2xl lg:shadow-none' 
+              ? 'w-72 translate-x-0 shadow-2xl' 
               : 'w-20 -translate-x-full lg:translate-x-0'
             }
             no-print
@@ -403,11 +403,11 @@ export default function App() {
         >
           <div className={`flex items-center justify-between p-6 pb-0 ${!isSidebarOpen && 'lg:justify-center'}`}>
             {isSidebarOpen && (
-              <p className="text-[10px] font-black text-stone-400 uppercase tracking-[0.2em] animate-in fade-in duration-500">Menu Principal</p>
+              <p className="text-[10px] font-black text-stone-500 uppercase tracking-[0.2em] animate-in fade-in duration-500">Menu Principal</p>
             )}
             <button 
               onClick={() => setIsSidebarOpen(false)}
-              className="lg:hidden p-2 hover:bg-stone-50 rounded-xl text-stone-400"
+              className="lg:hidden p-2 hover:bg-white/10 rounded-xl text-stone-500"
             >
               <Plus size={24} className="rotate-45" />
             </button>
@@ -430,16 +430,16 @@ export default function App() {
             />
           </div>
 
-          <div className={`p-6 border-t border-stone-50 bg-stone-50/30 flex items-center gap-4 transition-all ${!isSidebarOpen && 'lg:justify-center lg:px-0'}`}>
-            <div className={`w-12 h-12 shrink-0 rounded-2xl bg-[#003366] flex items-center justify-center text-white text-lg font-black shadow-lg shadow-blue-100`}>
+          <div className={`p-6 border-t border-stone-800 bg-black/20 flex items-center gap-4 transition-all ${!isSidebarOpen && 'lg:justify-center lg:px-0'}`}>
+            <div className={`w-12 h-12 shrink-0 rounded-2xl bg-blue-600 flex items-center justify-center text-white text-lg font-black shadow-lg shadow-blue-900/40`}>
               {user.name[0].toUpperCase()}
             </div>
             {isSidebarOpen && (
               <div className="overflow-hidden flex flex-col min-w-0 animate-in fade-in slide-in-from-left-2 duration-300">
-                <p className="text-sm font-black uppercase tracking-tighter truncate text-stone-900">{user.name}</p>
+                <p className="text-sm font-black uppercase tracking-tighter truncate text-white">{user.name}</p>
                 <div className="flex items-center gap-1.5">
                   <div className="w-1.5 h-1.5 rounded-full bg-emerald-500 animate-pulse" />
-                  <p className="text-[10px] font-bold text-stone-400 uppercase tracking-widest">Online</p>
+                  <p className="text-[10px] font-bold text-stone-500 uppercase tracking-widest">Online</p>
                 </div>
               </div>
             )}
@@ -447,7 +447,13 @@ export default function App() {
         </aside>
 
         {/* Main Content */}
-        <main className="flex-1 overflow-y-auto p-4 md:p-8">
+        <main 
+          className={`
+            flex-1 overflow-y-auto transition-all duration-300
+            ${isSidebarOpen ? 'lg:pl-72' : 'lg:pl-20'}
+            p-4 md:p-8
+          `}
+        >
           <AnimatePresence mode="wait">
             {view === 'cadastro' ? (
               <motion.div
@@ -564,8 +570,8 @@ function SidebarItem({ icon, label, active, onClick, collapsed }: { icon: React.
       className={`
         w-full flex items-center gap-4 p-4 rounded-2xl transition-all relative overflow-hidden group
         ${active 
-          ? 'bg-[#003366] text-white shadow-lg shadow-blue-100' 
-          : 'text-stone-400 hover:text-stone-900 hover:bg-stone-50'}
+          ? 'bg-blue-600 text-white shadow-lg shadow-blue-900/30' 
+          : 'text-stone-500 hover:text-white hover:bg-white/5'}
         ${!showLabel ? 'justify-center' : 'justify-start'}
       `}
       title={!showLabel ? label : ''}
@@ -1528,68 +1534,70 @@ function ScannerModal({ onScan, onClose }: { onScan: (text: string) => void, onC
   }, []);
 
   return (
-    <div className="fixed inset-0 z-[250] bg-black flex flex-col no-print">
-      {/* Immersive Camera View */}
-      <div id="reader" className="flex-1 w-full bg-black relative overflow-hidden">
-        {/* Viewfinder Overlay */}
-        <div className="absolute inset-0 z-10 pointer-events-none flex items-center justify-center">
-          <div className="w-[300px] h-[150px] border-2 border-white/30 rounded-3xl relative">
-            {/* Corners */}
-            <div className="absolute -top-1 -left-1 w-8 h-8 border-t-4 border-l-4 border-white rounded-tl-xl" />
-            <div className="absolute -top-1 -right-1 w-8 h-8 border-t-4 border-r-4 border-white rounded-tr-xl" />
-            <div className="absolute -bottom-1 -left-1 w-8 h-8 border-b-4 border-l-4 border-white rounded-bl-xl" />
-            <div className="absolute -bottom-1 -right-1 w-8 h-8 border-b-4 border-r-4 border-white rounded-br-xl" />
-            
-            {/* Scanning Laser */}
-            <motion.div 
-              animate={{ top: ['10%', '90%'] }}
-              transition={{ repeat: Infinity, duration: 2, ease: "linear" }}
-              className="absolute inset-x-4 h-0.5 bg-red-500 shadow-[0_0_15px_rgba(239,68,68,0.8)]"
-            />
+    <div className="fixed inset-0 z-[250] bg-black/80 backdrop-blur-sm flex items-center justify-center p-0 lg:p-12 no-print">
+      <div className="w-full h-full lg:max-w-3xl lg:max-h-[85vh] bg-black flex flex-col lg:rounded-[3rem] lg:overflow-hidden lg:shadow-[0_0_100px_rgba(0,0,0,0.5)] lg:border border-white/10 relative">
+        {/* Immersive Camera View */}
+        <div id="reader" className="flex-1 w-full bg-black relative overflow-hidden">
+          {/* Viewfinder Overlay */}
+          <div className="absolute inset-0 z-10 pointer-events-none flex items-center justify-center">
+            <div className="w-[300px] h-[150px] border-2 border-white/30 rounded-3xl relative">
+              {/* Corners */}
+              <div className="absolute -top-1 -left-1 w-8 h-8 border-t-4 border-l-4 border-white rounded-tl-xl" />
+              <div className="absolute -top-1 -right-1 w-8 h-8 border-t-4 border-r-4 border-white rounded-tr-xl" />
+              <div className="absolute -bottom-1 -left-1 w-8 h-8 border-b-4 border-l-4 border-white rounded-bl-xl" />
+              <div className="absolute -bottom-1 -right-1 w-8 h-8 border-b-4 border-r-4 border-white rounded-br-xl" />
+              
+              {/* Scanning Laser */}
+              <motion.div 
+                animate={{ top: ['10%', '90%'] }}
+                transition={{ repeat: Infinity, duration: 2, ease: "linear" }}
+                className="absolute inset-x-4 h-0.5 bg-red-500 shadow-[0_0_15px_rgba(239,68,68,0.8)]"
+              />
+            </div>
           </div>
+
+          {/* Flash Effect */}
+          <AnimatePresence>
+            {isFlashActive && (
+              <motion.div 
+                initial={{ opacity: 0 }}
+                animate={{ opacity: 1 }}
+                exit={{ opacity: 0 }}
+                className="absolute inset-0 z-20 bg-white"
+              />
+            )}
+          </AnimatePresence>
+
+          {/* Scan Feedback */}
+          <AnimatePresence>
+            {lastScanned && (
+              <motion.div 
+                initial={{ opacity: 0, scale: 0.8, y: 20 }}
+                animate={{ opacity: 1, scale: 1, y: 0 }}
+                exit={{ opacity: 0, scale: 0.8 }}
+                className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 z-30 bg-emerald-500 text-white px-8 py-4 rounded-3xl shadow-2xl flex flex-col items-center gap-2 border-4 border-white"
+              >
+                <PlusCircle size={32} />
+                <p className="text-sm font-black uppercase tracking-widest">NF {lastScanned} Lida!</p>
+              </motion.div>
+            )}
+          </AnimatePresence>
         </div>
 
-        {/* Flash Effect */}
-        <AnimatePresence>
-          {isFlashActive && (
-            <motion.div 
-              initial={{ opacity: 0 }}
-              animate={{ opacity: 1 }}
-              exit={{ opacity: 0 }}
-              className="absolute inset-0 z-20 bg-white"
-            />
-          )}
-        </AnimatePresence>
-
-        {/* Scan Feedback */}
-        <AnimatePresence>
-          {lastScanned && (
-            <motion.div 
-              initial={{ opacity: 0, scale: 0.8, y: 20 }}
-              animate={{ opacity: 1, scale: 1, y: 0 }}
-              exit={{ opacity: 0, scale: 0.8 }}
-              className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 z-30 bg-emerald-500 text-white px-8 py-4 rounded-3xl shadow-2xl flex flex-col items-center gap-2 border-4 border-white"
-            >
-              <PlusCircle size={32} />
-              <p className="text-sm font-black uppercase tracking-widest">NF {lastScanned} Lida!</p>
-            </motion.div>
-          )}
-        </AnimatePresence>
-      </div>
-
-      {/* Modern Control Bar */}
-      <div className="h-40 bg-stone-900 px-8 flex items-center justify-between text-white relative">
-        <div className="flex flex-col gap-1">
-          <h2 className="text-xl font-black uppercase tracking-tighter">Scanner de Notas</h2>
-          <p className="text-stone-400 text-[10px] font-bold uppercase tracking-widest">Aponte para o código de barras</p>
+        {/* Modern Control Bar */}
+        <div className="h-32 lg:h-40 bg-stone-900/50 backdrop-blur-xl px-8 flex items-center justify-between text-white relative shrink-0 border-t border-white/10">
+          <div className="flex flex-col gap-1">
+            <h2 className="text-lg lg:text-xl font-black uppercase tracking-tighter">Scanner de Notas</h2>
+            <p className="text-stone-400 text-[10px] font-bold uppercase tracking-widest">Leitura Automática e Contínua</p>
+          </div>
+          
+          <button 
+            onClick={onClose}
+            className="bg-white text-black p-4 lg:p-5 rounded-[1.5rem] lg:rounded-[2rem] transition-all shadow-xl font-black uppercase tracking-widest text-[10px] lg:text-xs flex items-center gap-3 active:scale-95"
+          >
+            Concluir <Plus size={20} className="rotate-45" />
+          </button>
         </div>
-        
-        <button 
-          onClick={onClose}
-          className="bg-white/10 hover:bg-white/20 p-5 rounded-3xl transition-all shadow-xl backdrop-blur-md font-black uppercase tracking-widest text-sm flex items-center gap-3"
-        >
-          Concluir <Plus size={20} className="rotate-45" />
-        </button>
       </div>
     </div>
   );
@@ -1638,23 +1646,23 @@ function SignatureFullscreenModal({ onSave, onClose }: { onSave: (img: string) =
   };
 
   return (
-    <div className="fixed inset-0 z-[300] bg-stone-900 flex flex-col no-print">
-      <div className="h-16 lg:h-20 bg-stone-900 text-white flex items-center justify-between px-6 lg:px-8 shrink-0">
+    <div className="fixed inset-0 z-[300] bg-stone-950 flex flex-col no-print">
+      <div className="h-16 lg:h-20 landscape:h-12 bg-stone-950 text-white flex items-center justify-between px-6 lg:px-8 shrink-0 transition-all border-b border-white/5">
         <div className="flex items-center gap-3">
-          <div className="p-2 bg-white/10 rounded-xl">
+          <div className="p-2 bg-white/10 rounded-xl landscape:hidden">
              <PenTool size={20} />
           </div>
-          <p className="text-[10px] font-black uppercase tracking-[0.2em]">Assinatura Digital</p>
+          <p className="text-[10px] font-black uppercase tracking-[0.2em] landscape:text-[8px]">Assinatura Digital</p>
         </div>
-        <button onClick={onClose} className="p-3 bg-white/10 hover:bg-white/20 rounded-2xl transition-all">
-          <Plus size={24} className="rotate-45" />
+        <button onClick={onClose} className="p-2 lg:p-3 bg-white/10 hover:bg-white/20 rounded-xl transition-all">
+          <Plus size={20} className="rotate-45" />
         </button>
       </div>
       
-      <div className="flex-1 bg-stone-50 relative overflow-hidden flex items-center justify-center p-3 sm:p-6 lg:p-10">
+      <div className="flex-1 bg-stone-100 relative overflow-hidden flex items-center justify-center p-2 sm:p-6 lg:p-10 landscape:p-1">
         {/* Instructional background text */}
-        <div className="absolute inset-0 flex items-center justify-center pointer-events-none opacity-[0.03]">
-          <h2 className="text-4xl sm:text-6xl lg:text-8xl font-black uppercase tracking-[0.5em] text-center">Assine Aqui</h2>
+        <div className="absolute inset-0 flex items-center justify-center pointer-events-none opacity-[0.02]">
+          <h2 className="text-4xl sm:text-6xl lg:text-8xl font-black uppercase tracking-[0.5em] text-center landscape:text-xs">Assine Aqui</h2>
         </div>
         
         <div className="w-full h-full relative">
@@ -1662,7 +1670,7 @@ function SignatureFullscreenModal({ onSave, onClose }: { onSave: (img: string) =
             ref={modalCanvasRef}
             penColor="black"
             canvasProps={{ 
-              className: "w-full h-full bg-white rounded-[2rem] sm:rounded-[3rem] shadow-2xl border-4 border-white cursor-crosshair",
+              className: "w-full h-full bg-white rounded-[1.5rem] sm:rounded-[3rem] shadow-2xl border-4 border-white cursor-crosshair landscape:rounded-[1rem]",
             }}
           />
           
@@ -1672,15 +1680,15 @@ function SignatureFullscreenModal({ onSave, onClose }: { onSave: (img: string) =
                 initial={{ opacity: 0, scale: 0.9 }}
                 animate={{ opacity: 1, scale: 1 }}
                 exit={{ opacity: 0 }}
-                className="absolute inset-0 z-10 flex items-center justify-center bg-stone-900/40 backdrop-blur-sm rounded-[2rem] sm:rounded-[3rem] pointer-events-none"
+                className="absolute inset-0 z-10 flex items-center justify-center bg-stone-950/40 backdrop-blur-sm rounded-[1.5rem] sm:rounded-[3rem] pointer-events-none landscape:hidden"
               >
                  <div className="bg-white p-6 rounded-3xl shadow-2xl flex flex-col items-center gap-4 text-center">
-                    <div className="p-4 bg-blue-50 text-[#003366] rounded-2xl animate-bounce">
+                    <div className="p-4 bg-blue-50 text-blue-600 rounded-2xl animate-bounce">
                        <RotateCcw size={32} />
                     </div>
                     <div>
                       <p className="text-xs font-black uppercase tracking-tighter text-stone-900">Gire o celular</p>
-                      <p className="text-[10px] font-bold text-stone-400 uppercase tracking-widest mt-1">Para ter mais espaço</p>
+                      <p className="text-[10px] font-bold text-stone-400 uppercase tracking-widest mt-1">Para mais espaço</p>
                     </div>
                  </div>
               </motion.div>
@@ -1689,18 +1697,18 @@ function SignatureFullscreenModal({ onSave, onClose }: { onSave: (img: string) =
         </div>
       </div>
 
-      <div className="p-6 sm:p-8 bg-white border-t border-stone-100 flex gap-4 shrink-0">
+      <div className="p-4 sm:p-8 landscape:p-2 bg-white border-t border-stone-200 flex gap-4 shrink-0 transition-all">
         <button 
           onClick={() => modalCanvasRef.current?.clear()}
-          className="flex-1 py-4 sm:py-5 rounded-2xl sm:rounded-3xl border-2 border-stone-100 text-stone-400 font-black uppercase tracking-widest text-[10px] hover:bg-stone-50 transition-all active:scale-95"
+          className="flex-1 py-3 sm:py-5 rounded-xl sm:rounded-3xl border-2 border-stone-100 text-stone-400 font-black uppercase tracking-widest text-[9px] hover:bg-stone-50 transition-all active:scale-95 landscape:py-2"
         >
           Limpar
         </button>
         <button 
           onClick={handleDone}
-          className="flex-[2.5] py-4 sm:py-5 rounded-2xl sm:rounded-3xl bg-[#003366] text-white font-black uppercase tracking-widest text-[10px] hover:shadow-xl hover:shadow-blue-100 transition-all active:scale-95 flex items-center justify-center gap-3"
+          className="flex-[3] py-3 sm:py-5 rounded-xl sm:rounded-3xl bg-blue-600 text-white font-black uppercase tracking-widest text-[9px] hover:shadow-xl hover:shadow-blue-900/40 transition-all active:scale-95 flex items-center justify-center gap-3 landscape:py-2"
         >
-          Confirmar <PlusCircle size={18} />
+          Confirmar <PlusCircle size={14} />
         </button>
       </div>
     </div>
