@@ -293,32 +293,38 @@ export default function App() {
       )}
 
       {/* Header */}
-      <header className="no-print h-16 bg-white border-b border-stone-200 px-4 lg:px-6 flex items-center justify-between shrink-0 z-50 shadow-sm relative">
-        <div className="flex items-center gap-2 lg:gap-4">
+      <header className="no-print h-20 bg-white border-b border-stone-100 px-6 lg:px-10 flex items-center justify-between shrink-0 z-50 shadow-sm relative">
+        <div className="flex items-center gap-8">
           <button 
             onClick={() => setIsSidebarOpen(!isSidebarOpen)}
-            className="p-2 hover:bg-stone-100 rounded-lg transition-colors active:scale-90"
+            className="lg:hidden p-3 hover:bg-stone-50 rounded-2xl transition-all active:scale-95 text-stone-400 hover:text-stone-900"
           >
-            <Menu size={20} />
+            <Menu size={24} />
           </button>
           
-          <div className="flex items-center gap-6">
-            <div className="text-stone-900 scale-[1.3] origin-left transition-transform hover:scale-[1.35]">
-              <BrandLogo size="sm" className="brightness-0" />
+          <div className="flex items-center gap-8">
+            <div className="text-stone-900 transition-transform hover:scale-105 cursor-pointer">
+              <BrandLogo size="md" className="brightness-0" />
             </div>
-            <h2 className="text-sm lg:text-base font-black tracking-tighter uppercase hidden sm:block">
+            <div className="w-[1px] h-8 bg-stone-200 hidden lg:block" />
+            <h2 className="text-lg lg:text-xl font-black tracking-tighter uppercase hidden sm:block">
               Expedição <span className="text-[#003366]">CTDI</span>
             </h2>
           </div>
         </div>
         
-        <div className="flex items-center gap-4">
+        <div className="flex items-center gap-6">
+          <div className="hidden md:flex flex-col items-end">
+            <p className="text-xs font-black uppercase tracking-widest text-stone-900">{user.name}</p>
+            <p className="text-[10px] font-bold text-stone-400 uppercase tracking-widest">Acesso Autorizado</p>
+          </div>
+          <div className="w-[1px] h-6 bg-stone-200 hidden md:block" />
           <button 
             onClick={handleLogout}
-            className="p-2.5 text-stone-500 hover:text-red-600 transition-colors rounded-full hover:bg-stone-100"
-            title="Sair"
+            className="p-3 text-stone-400 hover:text-red-500 transition-all rounded-2xl hover:bg-red-50 group"
+            title="Sair do Sistema"
           >
-            <LogOut size={20} />
+            <LogOut size={22} className="group-hover:-translate-x-0.5 transition-transform" />
           </button>
         </div>
       </header>
@@ -383,46 +389,44 @@ export default function App() {
         </AnimatePresence>
 
         {/* Sidebar */}
-        <motion.aside 
-          initial={false}
-          animate={{ x: isSidebarOpen ? 0 : '-100%' }}
-          transition={{ type: "spring", stiffness: 300, damping: 30 }}
+        <aside 
           className={`
-            fixed lg:relative inset-y-0 left-0 w-72 bg-white border-r border-stone-200 shadow-xl 
-            lg:shadow-none z-[60] lg:z-0
-            lg:translate-x-0
+            fixed lg:relative inset-y-0 left-0 w-72 bg-white border-r border-stone-100 z-[60] lg:z-0
+            transform transition-transform duration-300 ease-in-out flex flex-col
+            ${isSidebarOpen ? 'translate-x-0' : '-translate-x-full lg:translate-x-0'}
+            no-print
           `}
         >
-          <nav className="flex-1 py-6 px-3 space-y-2">
+          <div className="flex-1 py-10 px-6 space-y-3">
+             <p className="text-[10px] font-black text-stone-400 uppercase tracking-[0.2em] mb-6 px-4">Menu Principal</p>
             <SidebarItem 
-              icon={<PlusCircle size={20} />} 
+              icon={<PlusCircle size={22} />} 
               label="Novo Cadastro" 
               active={view === 'cadastro'} 
-              collapsed={!isSidebarOpen && window.innerWidth < 1024} // Only collapse on mobile if sidebar is closed
               onClick={startNewCadastro}
             />
             <SidebarItem 
-              icon={<ClipboardList size={20} />} 
+              icon={<ClipboardList size={22} />} 
               label="Consultar Registros" 
               active={view === 'consulta'} 
-              collapsed={!isSidebarOpen && window.innerWidth < 1024} // Only collapse on mobile if sidebar is closed
-              onClick={() => { setView('consulta'); setSelectedRecord(null); setIsSidebarOpen(false); }} // Close sidebar on mobile after navigation
+              onClick={() => { setView('consulta'); setSelectedRecord(null); setIsSidebarOpen(false); }} 
             />
-          </nav>
-          <div className="p-4 border-t border-stone-100 bg-stone-50/50">
-            <div className={`flex items-center gap-3 ${!isSidebarOpen && window.innerWidth < 1024 && 'justify-center'}`}>
-              <div className="w-10 h-10 rounded-xl bg-stone-900 flex items-center justify-center text-white text-sm font-black shadow-lg shadow-stone-200">
+          </div>
+          <div className="p-8 border-t border-stone-50 bg-stone-50/30">
+            <div className="flex items-center gap-4">
+              <div className="w-12 h-12 rounded-2xl bg-[#003366] flex items-center justify-center text-white text-lg font-black shadow-lg shadow-blue-100">
                 {user.name[0].toUpperCase()}
               </div>
-              {(isSidebarOpen || window.innerWidth >= 1024) && (
-                <div className="overflow-hidden flex flex-col">
-                  <p className="text-xs font-black uppercase tracking-tighter truncate">{user.name}</p>
-                  <p className="text-[10px] font-bold text-stone-400 uppercase tracking-widest">Operador</p>
+              <div className="overflow-hidden flex flex-col">
+                <p className="text-sm font-black uppercase tracking-tighter truncate text-stone-900">{user.name}</p>
+                <div className="flex items-center gap-1.5">
+                  <div className="w-1.5 h-1.5 rounded-full bg-emerald-500 animate-pulse" />
+                  <p className="text-[10px] font-bold text-stone-400 uppercase tracking-widest">Online</p>
                 </div>
-              )}
+              </div>
             </div>
           </div>
-        </motion.aside>
+        </aside>
 
         {/* Main Content */}
         <main className="flex-1 overflow-y-auto p-4 md:p-8">
@@ -449,20 +453,30 @@ export default function App() {
                 exit={{ opacity: 0, scale: 0.95 }}
                 className="flex flex-col items-center"
               >
-                <div className="mb-6 flex gap-4 no-print">
+                {/* Header Actions for Preview */}
+                <div className="w-full max-w-4xl flex items-center justify-between mb-8 no-print px-4">
                   <button 
                     onClick={() => {
-                      if (records.some(r => r.assinaturaDigital.codigoRastreabilidade === formData.assinaturaDigital.codigoRastreabilidade)) {
-                        setView('consulta');
+                      if (selectedRecord) {
+                        setFormData(selectedRecord);
+                        setView('cadastro');
                       } else {
                         setView('cadastro');
                       }
-                    }}
-                    className="flex items-center gap-2 bg-white border border-stone-200 px-6 py-3 rounded-xl font-bold hover:bg-stone-50 transition-all shadow-sm"
+                    }} 
+                    className="flex items-center gap-3 px-6 py-4 bg-white border border-stone-200 rounded-2xl font-black text-[10px] uppercase tracking-widest text-stone-500 hover:text-stone-900 hover:border-stone-400 transition-all shadow-sm active:scale-95"
                   >
-                    <ChevronLeft size={18} /> Voltar
+                    <ChevronLeft size={18} />
+                    Voltar para Edição
                   </button>
+
+                  <div className="flex items-center gap-3">
+                    <span className="px-3 py-1 bg-emerald-100 text-emerald-700 rounded-full text-[9px] font-black uppercase tracking-widest">
+                      Pronto para Impressão
+                    </span>
+                  </div>
                 </div>
+
                 <DocumentPreview data={formData} />
               </motion.div>
             ) : (
@@ -1256,90 +1270,29 @@ function CadastroView({
         </div>
         </div>
  
-       {/* Scanner Modal */}
-       <AnimatePresence>
-         {isScannerActive && (
-           <div className="fixed inset-0 z-[200] flex items-center justify-center bg-stone-900/90 backdrop-blur-md p-4">
-             <motion.div 
-               initial={{ opacity: 0, scale: 0.9 }}
-               animate={{ opacity: 1, scale: 1 }}
-               exit={{ opacity: 0, scale: 0.9 }}
-               className="bg-white rounded-[2.5rem] w-full max-w-lg overflow-hidden relative shadow-2xl"
-             >
-               <div className="bg-stone-900 p-8 text-white flex items-center justify-between">
-                 <div className="flex items-center gap-4">
-                   <div className="p-3 bg-white/10 rounded-2xl">
-                     <Camera size={24} />
-                   </div>
-                   <div>
-                     <h2 className="text-xl font-black uppercase tracking-tighter">Escanear Barcode</h2>
-                     <p className="text-stone-400 text-[10px] font-bold uppercase tracking-widest mt-1">Aponte para o código da NF-e</p>
-                   </div>
-                 </div>
-                 <button 
-                   onClick={() => setScannerActive(false)}
-                   className="p-3 bg-white/10 hover:bg-white/20 rounded-2xl transition-all"
-                 >
-                   <Plus size={24} className="rotate-45" />
-                 </button>
-               </div>
-               
-               <div className="p-8 text-center text-stone-900">
-                 <div id="reader" className="w-full rounded-2xl overflow-hidden border-2 border-stone-100 bg-stone-50 min-h-[300px] flex items-center justify-center">
-                   <Camera className="text-stone-200" size={64} />
-                 </div>
-                 
-                 <div className="mt-8 space-y-4">
-                   <div className="flex items-start gap-4 p-4 bg-emerald-50 rounded-2xl border border-emerald-100 text-left">
-                     <div className="p-2 bg-emerald-500 rounded-lg text-white mt-1">
-                       <FileText size={16} />
-                     </div>
-                     <p className="text-[10px] font-bold text-emerald-800 leading-relaxed uppercase tracking-tight">
-                       O sistema extrairá o número da nota automaticamente (chave de 44 dígitos).
-                     </p>
-                   </div>
-                 </div>
-               </div>
- 
-               <div className="px-8 pb-10">
-                 <button 
-                   onClick={() => {
-                     const html5QrCode = new Html5QrcodeScanner("reader", { 
-                       fps: 10, 
-                       qrbox: { width: 300, height: 100 },
-                       aspectRatio: 1.0,
-                       showTorchButtonIfSupported: true,
-                       showZoomSliderIfSupported: true
-                     }, false);
-                     
-                     html5QrCode.render((decodedText) => {
-                       html5QrCode.clear();
-                       setScannerActive(false);
-                       
-                       // Processar Chave de Acesso NF-e (44 dígitos)
-                       if (decodedText.length >= 34) {
-                         const nfNumero = decodedText.substring(25, 34);
-                         const newNF: NFItem = {
-                           id: Math.random().toString(36).substr(2, 9),
-                           numero: nfNumero,
-                           expedicaoId: '',
-                         };
-                         setData((prev: any) => ({ ...prev, nfs: [...prev.nfs, newNF] }));
-                         setNotification({ message: `NF ${nfNumero} extraída com sucesso!`, type: 'success' });
-                       } else {
-                         setNotification({ message: 'Barcode inválido.', type: 'error' });
-                       }
-                     }, () => {});
-                   }}
-                   className="w-full bg-stone-900 text-white py-5 rounded-3xl font-black uppercase tracking-widest hover:bg-stone-800 transition-all shadow-xl shadow-stone-200"
-                 >
-                   Ativar Leitor
-                 </button>
-               </div>
-             </motion.div>
-           </div>
-         )}
-       </AnimatePresence>
+        {/* Scanner Modal */}
+        <AnimatePresence>
+          {isScannerActive && (
+            <ScannerModal 
+              onScan={(decodedText) => {
+                // Processar Chave de Acesso NF-e (44 dígitos)
+                if (decodedText.length >= 34) {
+                  const nfNumero = decodedText.substring(25, 34);
+                  const newNF: NFItem = {
+                    id: Math.random().toString(36).substr(2, 9),
+                    numero: nfNumero,
+                    expedicaoId: '',
+                  };
+                  setData((prev: any) => ({ ...prev, nfs: [...prev.nfs, newNF] }));
+                  setNotification({ message: `NF ${nfNumero} lida!`, type: 'success' });
+                } else {
+                  setNotification({ message: 'Barcode inválido.', type: 'error' });
+                }
+              }}
+              onClose={() => setScannerActive(false)}
+            />
+          )}
+        </AnimatePresence>
      </div>
    );
  }
@@ -1474,6 +1427,100 @@ function ConsultaView({
           <p className="text-stone-400 text-sm font-bold uppercase tracking-widest">Nenhum registro encontrado</p>
         </div>
       )}
+    </div>
+  );
+}
+
+function ScannerModal({ onScan, onClose }: { onScan: (text: string) => void, onClose: () => void }) {
+  const [lastScanned, setLastScanned] = useState<string | null>(null);
+  
+  useEffect(() => {
+    const html5QrCode = new Html5QrcodeScanner("reader", { 
+      fps: 10, 
+      qrbox: { width: 300, height: 100 },
+      aspectRatio: 1.0,
+      showTorchButtonIfSupported: true,
+      showZoomSliderIfSupported: true
+    }, false);
+    
+    html5QrCode.render((decodedText) => {
+      onScan(decodedText);
+      setLastScanned(decodedText.substring(25, 34) || decodedText);
+      // Feedback visual rápido
+      setTimeout(() => setLastScanned(null), 2000);
+    }, () => {});
+
+    return () => {
+      html5QrCode.clear().catch(e => console.error("Failed to clear scanner", e));
+    };
+  }, []);
+
+  return (
+    <div className="fixed inset-0 z-[200] flex items-center justify-center bg-stone-900/90 backdrop-blur-md p-4">
+      <motion.div 
+        initial={{ opacity: 0, scale: 0.9 }}
+        animate={{ opacity: 1, scale: 1 }}
+        exit={{ opacity: 0, scale: 0.9 }}
+        className="bg-white rounded-[2.5rem] w-full max-w-lg overflow-hidden relative shadow-2xl"
+      >
+        <div className="bg-stone-900 p-8 text-white flex items-center justify-between">
+          <div className="flex items-center gap-4">
+            <div className="p-3 bg-white/10 rounded-2xl">
+              <Camera size={24} />
+            </div>
+            <div>
+              <h2 className="text-xl font-black uppercase tracking-tighter">Scanner Ativo</h2>
+              <p className="text-stone-400 text-[10px] font-bold uppercase tracking-widest mt-1">Leitura Automática e Contínua</p>
+            </div>
+          </div>
+          <button 
+            onClick={onClose}
+            className="p-3 bg-white/10 hover:bg-white/20 rounded-2xl transition-all"
+          >
+            <Plus size={24} className="rotate-45" />
+          </button>
+        </div>
+        
+        <div className="p-8 text-center text-stone-900">
+          <div id="reader" className="w-full rounded-2xl overflow-hidden border-2 border-stone-100 bg-stone-50 min-h-[300px] flex items-center justify-center relative">
+            {lastScanned && (
+              <motion.div 
+                initial={{ opacity: 0, y: 20 }}
+                animate={{ opacity: 1, y: 0 }}
+                className="absolute inset-x-8 top-1/2 -translate-y-1/2 z-10 bg-emerald-500 text-white p-6 rounded-3xl shadow-2xl border-4 border-white flex flex-col items-center gap-2"
+              >
+                <PlusCircle size={32} />
+                <p className="text-xs font-black uppercase tracking-widest">NF {lastScanned} Lida!</p>
+              </motion.div>
+            )}
+          </div>
+          
+          <div className="mt-8">
+            <div className="flex items-start gap-4 p-5 bg-blue-50/50 rounded-2xl border border-blue-100 text-left">
+              <div className="p-2 bg-[#003366] rounded-xl text-white mt-1">
+                <FileText size={18} />
+              </div>
+              <div>
+                <p className="text-[10px] font-black text-stone-900 leading-relaxed uppercase tracking-tight mb-1">
+                  Múltiplas Leituras
+                </p>
+                <p className="text-[9px] font-bold text-stone-400 leading-relaxed uppercase tracking-tight">
+                  Continue apontando para outras notas para adicioná-las em sequência.
+                </p>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <div className="px-8 pb-10">
+          <button 
+            onClick={onClose}
+            className="w-full bg-stone-900 text-white py-5 rounded-3xl font-black uppercase tracking-widest hover:bg-stone-800 transition-all shadow-xl shadow-stone-200 flex items-center justify-center gap-3"
+          >
+            Concluir Leituras
+          </button>
+        </div>
+      </motion.div>
     </div>
   );
 }
