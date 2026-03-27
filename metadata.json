@@ -1,0 +1,5 @@
+{
+  "name": "Gerador de Registro de Expedição",
+  "description": "Sistema para geração e impressão de documentos de Registro de Expedição (CTDI).",
+  "requestFramePermissions": []
+}

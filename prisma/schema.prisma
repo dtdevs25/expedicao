@@ -1,0 +1,46 @@
+// This is your Prisma schema file,
+// learn more about it in the docs: https://pris.ly/d/prisma-schema
+
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+model Expedicao {
+  id                    Int          @id @default(autoincrement())
+  responsavel           String
+  dataSaida             String
+  cliente               String
+  destino               String
+  natureza              String
+  volumes              String
+  transportadora       String
+  motorista            String
+  rgCpf                String
+  placaVeiculo         String
+  ajudante             String?
+  nomeAssinatura       String
+  dataHoraAssinatura   String
+  codigoRastreabilidade String       @unique
+  notasFiscais          NotaFiscal[]
+  createdAt             DateTime     @default(now())
+}
+
+model NotaFiscal {
+  id             String    @id @default(cuid())
+  numero         String
+  expedicaoRefId String    // ID de expedição referente à NF (negocial)
+  expedicao      Expedicao @relation(fields: [expedicaoId], references: [id], onDelete: Cascade)
+  expedicaoId    Int
+}
+model User {
+  id       Int    @id @default(autoincrement())
+  username String @unique
+  password String // Hashed
+  name     String
+  role     String @default("OPERADOR")
+}
