@@ -6,7 +6,7 @@ import {
   RotateCcw, Wrench, ArrowLeftRight, AlertCircle, Eraser,
   PenTool, Edit3, EyeOff, Camera
 } from 'lucide-react';
-import { motion, AnimatePresence } from 'motion/react';
+import { motion, AnimatePresence } from 'framer-motion';
 import SignatureCanvas from 'react-signature-canvas';
 import { Html5QrcodeScanner } from 'html5-qrcode';
 import { RegistroExpedicao, NFItem, NaturezaOperacao } from './types';

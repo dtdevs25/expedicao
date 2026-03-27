@@ -29,8 +29,9 @@ ENV PUPPETEER_SKIP_CHROMIUM_DOWNLOAD=true
 ENV PUPPETEER_EXECUTABLE_PATH=/usr/bin/chromium
 
 # Puppeteer and Prisma dependencies for Linux
-RUN apt-get clean && apt-get update || true && \
-    apt-get install -y --no-install-recommends ca-certificates && \
+RUN apt-get clean && \
+    apt-get update -o Acquire::Check-Valid-Until=false --allow-insecure-repositories || true && \
+    apt-get install -y --allow-unauthenticated --no-install-recommends ca-certificates debian-archive-keyring && \
     apt-get update && \
     apt-get install -y \
     openssl \
