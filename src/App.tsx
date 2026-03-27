@@ -775,25 +775,6 @@ function ChangePasswordView({ token, onComplete }: { token: string, onComplete: 
   );
 }
 
-function InputField({ label, value, onChange, icon, type = "text" }: any) {
-  return (
-    <div className="space-y-1.5">
-      <label className="text-[10px] font-black uppercase tracking-widest text-stone-400 ml-1">{label}</label>
-      <div className="relative">
-        <div className="absolute left-4 top-1/2 -translate-y-1/2 text-stone-300">
-          {icon}
-        </div>
-        <input
-          type={type}
-          value={value}
-          onChange={(e) => onChange(e.target.value)}
-          className="w-full bg-stone-50 border-none rounded-2xl py-4 pl-12 pr-4 text-sm focus:ring-2 focus:ring-stone-900 transition-all"
-          required
-        />
-      </div>
-    </div>
-  );
-}
 
 function CadastroView({ 
   data, 
@@ -1274,22 +1255,46 @@ function ConsultaView({
   );
 }
 
-function InputField({ label, value, onChange, placeholder }: { label: string, value: string, onChange: (v: string) => void, placeholder?: string }) {
-  const isEmpty = value.trim() === '';
+function InputField({ 
+  label, 
+  value, 
+  onChange, 
+  icon, 
+  type = "text", 
+  placeholder, 
+  required = false 
+}: { 
+  label: string, 
+  value: string, 
+  onChange: (v: string) => void, 
+  icon?: React.ReactNode, 
+  type?: string, 
+  placeholder?: string, 
+  required?: boolean 
+}) {
+  const isEmpty = required && value.trim() === '';
   return (
-    <div>
-      <label className="block text-[10px] font-black text-stone-400 uppercase tracking-tighter mb-1">
+    <div className="space-y-1.5">
+      <label className="text-[10px] font-black uppercase tracking-widest text-stone-400 ml-1">
         {label} {isEmpty && <span className="text-red-500">*</span>}
       </label>
-      <input
-        type="text"
-        value={value}
-        placeholder={placeholder}
-        onChange={(e) => onChange(e.target.value)}
-        className={`w-full bg-white border rounded-xl py-2.5 px-4 text-xs focus:ring-2 focus:ring-stone-900 focus:border-stone-900 transition-all shadow-sm ${
-          isEmpty ? 'border-amber-200 bg-amber-50/30' : 'border-stone-200'
-        }`}
-      />
+      <div className="relative">
+        {icon && (
+          <div className="absolute left-4 top-1/2 -translate-y-1/2 text-stone-300">
+            {icon}
+          </div>
+        )}
+        <input
+          type={type}
+          value={value}
+          placeholder={placeholder}
+          onChange={(e) => onChange(e.target.value)}
+          className={`w-full bg-stone-50 border rounded-2xl py-4 ${icon ? 'pl-12' : 'px-6'} pr-4 text-sm focus:ring-2 focus:ring-stone-900 transition-all ${
+            isEmpty ? 'border-amber-200 bg-amber-50/30' : 'border-transparent'
+          }`}
+          required={required}
+        />
+      </div>
     </div>
   );
 }
@@ -1313,7 +1318,7 @@ function DocumentPreview({ data }: { data: RegistroExpedicao }) {
       <div className="document-page mx-auto bg-white p-16 shadow-2xl border border-stone-200 relative text-black font-sans" style={{ width: '210mm', minHeight: '297mm' }}>
         {/* Header */}
         <div className="flex flex-col items-center mb-12">
-          <Logo size="lg" className="mb-6" />
+          <BrandLogo size="lg" className="mb-6 brightness-0" />
           <h1 className="text-xl font-bold uppercase tracking-tight">REGISTRO DE EXPEDIÇÃO</h1>
         </div>
 
