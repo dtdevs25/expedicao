@@ -68,38 +68,6 @@ const Logo = ({ size = "md", className = "" }: { size?: "sm" | "md" | "lg", clas
   );
 };
 
-// Placeholder for SetupView and LoginView - these would typically be in separate files
-const SetupView = ({ onComplete }: { onComplete: (userData: { name: string, token: string }) => void }) => (
-  <div className="flex items-center justify-center h-screen bg-stone-100">
-    <div className="p-8 bg-white rounded-lg shadow-lg text-center">
-      <h2 className="text-2xl font-bold mb-4">Configuração Inicial</h2>
-      <p className="mb-6">Por favor, configure o sistema pela primeira vez.</p>
-      <button 
-        onClick={() => onComplete({ name: 'Admin', token: 'mock-setup-token' })} 
-        className="px-6 py-3 bg-blue-600 text-white rounded-lg hover:bg-blue-700"
-      >
-        Completar Configuração
-      </button>
-    </div>
-  </div>
-);
-
-const LoginView = ({ onLogin }: { onLogin: (userData: { name: string, token: string }) => void }) => (
-  <div className="flex items-center justify-center h-screen bg-stone-100">
-    <div className="p-8 bg-white rounded-lg shadow-lg text-center">
-      <h2 className="text-2xl font-bold mb-4">Login</h2>
-      <p className="mb-6">Faça login para continuar.</p>
-      <button 
-        onClick={() => onLogin({ name: 'Akim de Oliveira', token: 'mock-user-token' })} 
-        className="px-6 py-3 bg-green-600 text-white rounded-lg hover:bg-green-700"
-      >
-        Entrar
-      </button>
-    </div>
-  </div>
-);
-
-
 export default function App() {
   const [user, setUser] = useState<{ name: string, token: string } | null>(null);
   const [setupRequired, setSetupRequired] = useState<boolean>(false);
