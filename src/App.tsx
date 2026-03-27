@@ -73,6 +73,13 @@ export default function App() {
   const [confirmDelete, setConfirmDelete] = useState<string | null>(null);
 
   useEffect(() => {
+    if (notification) {
+      const timer = setTimeout(() => setNotification(null), 10000);
+      return () => clearTimeout(timer);
+    }
+  }, [notification]);
+
+  useEffect(() => {
     const initAuth = async () => {
       try {
         const savedUser = localStorage.getItem('ctdi_user');
@@ -524,6 +531,20 @@ function LoginView({ onLogin }: { onLogin: (data: any) => void }) {
   const [success, setSuccess] = useState('');
   const [loading, setLoading] = useState(false);
   const [showPassword, setShowPassword] = useState(false);
+
+  useEffect(() => {
+    if (error) {
+      const timer = setTimeout(() => setError(''), 10000);
+      return () => clearTimeout(timer);
+    }
+  }, [error]);
+
+  useEffect(() => {
+    if (success) {
+      const timer = setTimeout(() => setSuccess(''), 10000);
+      return () => clearTimeout(timer);
+    }
+  }, [success]);
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
