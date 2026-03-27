@@ -280,36 +280,36 @@ export default function App() {
   }
 
   return (
-    <div className="h-screen bg-stone-50 flex flex-col font-sans text-stone-900 overflow-hidden">
+    <div className="h-screen bg-stone-50 font-sans text-stone-900 overflow-hidden">
       {/* Sidebar Overlay (Mobile only) */}
       {isSidebarOpen && (
         <motion.div 
           initial={{ opacity: 0 }}
           animate={{ opacity: 1 }}
           exit={{ opacity: 0 }}
-          className="lg:hidden fixed inset-0 bg-stone-900/40 backdrop-blur-sm z-50"
+          className="lg:hidden fixed inset-0 bg-stone-900/40 backdrop-blur-sm z-[55]"
           onClick={() => setIsSidebarOpen(false)}
         />
       )}
 
-      {/* Header */}
-      <header className="no-print h-20 bg-white border-b border-stone-100 px-6 lg:px-10 flex items-center justify-between shrink-0 z-50 shadow-sm relative">
-          <div className="flex items-center gap-4">
-            <button 
-              onClick={() => setIsSidebarOpen(!isSidebarOpen)}
-              className="p-2.5 hover:bg-stone-100 rounded-xl transition-all active:scale-95 text-stone-400 hover:text-stone-900"
-            >
-              <Menu size={22} />
-            </button>
-            
-            <div className="text-stone-900 transition-transform hover:scale-105 cursor-pointer flex items-center justify-center">
-              <BrandLogo size="md" className="brightness-0" />
-            </div>
-            <div className="w-[1px] h-10 bg-stone-200 hidden lg:block" />
-            <h2 className="text-lg lg:text-xl font-black tracking-tighter uppercase hidden sm:block">
-              Expedição <span className="text-[#003366]">CTDI</span>
-            </h2>
+      {/* Header — fixed, full-width */}
+      <header className="no-print fixed top-0 left-0 right-0 h-20 bg-white border-b border-stone-100 px-6 lg:px-10 flex items-center justify-between z-[70] shadow-sm">
+        <div className="flex items-center gap-4">
+          <button 
+            onClick={() => setIsSidebarOpen(!isSidebarOpen)}
+            className="p-2.5 hover:bg-stone-100 rounded-xl transition-all active:scale-95 text-stone-400 hover:text-stone-900"
+          >
+            <Menu size={22} />
+          </button>
+          
+          <div className="text-stone-900 transition-transform hover:scale-105 cursor-pointer flex items-center justify-center">
+            <BrandLogo size="md" className="brightness-0" />
           </div>
+          <div className="w-[1px] h-10 bg-stone-200 hidden lg:block" />
+          <h2 className="text-lg lg:text-xl font-black tracking-tighter uppercase hidden sm:block">
+            Expedição <span className="text-[#003366]">CTDI</span>
+          </h2>
+        </div>
         
         <div className="flex items-center gap-6">
           <div className="hidden md:flex flex-col items-end">
@@ -327,7 +327,9 @@ export default function App() {
         </div>
       </header>
 
-      <div className="flex flex-1 overflow-hidden relative">
+      {/* Below-header layout */}
+      <div className="flex pt-20 h-screen">
+
         {/* Notifications */}
         <AnimatePresence>
           {notification && (
@@ -335,7 +337,7 @@ export default function App() {
               initial={{ opacity: 0, y: -20 }}
               animate={{ opacity: 1, y: 0 }}
               exit={{ opacity: 0, y: -20 }}
-              className={`fixed top-20 right-8 z-[100] px-6 py-4 rounded-2xl shadow-2xl flex items-center gap-4 border ${
+              className={`fixed top-24 right-8 z-[100] px-6 py-4 rounded-2xl shadow-2xl flex items-center gap-4 border ${
                 notification.type === 'error' ? 'bg-red-50 border-red-100 text-red-600' : 'bg-emerald-50 border-emerald-100 text-emerald-600'
               }`}
             >
@@ -386,76 +388,83 @@ export default function App() {
           )}
         </AnimatePresence>
 
-        {/* Sidebar */}
+        {/* Sidebar — starts BELOW header (top-20) */}
         <aside 
           className={`
-            fixed inset-y-0 left-0 bg-stone-950 text-white z-[60]
-            transition-all duration-300 ease-in-out flex flex-col border-r border-stone-800
+            fixed top-20 bottom-0 left-0 bg-white z-[60]
+            transition-all duration-300 ease-in-out flex flex-col
+            border-r border-stone-200
             ${isSidebarOpen 
-              ? 'w-72 translate-x-0 shadow-2xl' 
-              : 'w-0 lg:w-20 -translate-x-full lg:translate-x-0'
+              ? 'w-64 translate-x-0 shadow-xl shadow-stone-200/60' 
+              : 'w-0 lg:w-[4.5rem] -translate-x-full lg:translate-x-0'
             }
             no-print overflow-hidden
           `}
         >
-          <div className={`flex items-center justify-between p-6 pb-0 ${!isSidebarOpen && 'lg:justify-center'}`}>
+          {/* Section label */}
+          <div className="px-4 pt-6 pb-2">
             {isSidebarOpen && (
-              <p className="text-[10px] font-black text-stone-500 uppercase tracking-[0.2em] animate-in fade-in duration-500 whitespace-nowrap">Menu Principal</p>
+              <p className="text-[9px] font-black text-stone-400 uppercase tracking-[0.25em] whitespace-nowrap animate-in fade-in duration-300">Navegação</p>
             )}
           </div>
 
-          <div className={`flex-1 py-10 px-4 space-y-3`}>
+          <nav className="flex-1 px-3 py-3 space-y-1.5">
             <SidebarItem 
-              icon={<PlusCircle size={22} />} 
-              label="Novo Cadastro" 
+              icon={<PlusCircle size={20} />} 
+              label="Novo Cadastro"
+              sublabel="Criar registro"
               active={view === 'cadastro'} 
               collapsed={!isSidebarOpen}
               onClick={() => { startNewCadastro(); if(window.innerWidth < 1024) setIsSidebarOpen(false); }}
             />
             <SidebarItem 
-              icon={<ClipboardList size={22} />} 
-              label="Consultar Registros" 
+              icon={<ClipboardList size={20} />} 
+              label="Consultar"
+              sublabel="Ver registros"
               active={view === 'consulta'} 
               collapsed={!isSidebarOpen}
               onClick={() => { setView('consulta'); setSelectedRecord(null); if(window.innerWidth < 1024) setIsSidebarOpen(false); }} 
             />
-          </div>
+          </nav>
 
-          <div className={`p-4 border-t border-stone-800 bg-black/20 flex items-center gap-4 transition-all ${!isSidebarOpen && 'justify-center px-0'}`}>
-            <div className={`w-11 h-11 shrink-0 rounded-xl bg-blue-600 flex items-center justify-center text-white text-base font-black shadow-lg shadow-blue-900/40`}>
+          {/* User footer */}
+          <div className={`p-3 border-t border-stone-100 flex items-center gap-3 transition-all ${!isSidebarOpen && 'justify-center'}`}>
+            <div className="w-9 h-9 shrink-0 rounded-xl bg-[#003366] flex items-center justify-center text-white text-sm font-black shadow-md">
               {user.name[0].toUpperCase()}
             </div>
             {isSidebarOpen && (
               <div className="overflow-hidden flex flex-col min-w-0 animate-in fade-in slide-in-from-left-2 duration-300">
-                <p className="text-sm font-black uppercase tracking-tighter truncate text-white">{user.name}</p>
+                <p className="text-xs font-black uppercase tracking-tighter truncate text-stone-900">{user.name}</p>
                 <div className="flex items-center gap-1.5">
                   <div className="w-1.5 h-1.5 rounded-full bg-emerald-500 animate-pulse" />
-                  <p className="text-[10px] font-bold text-stone-500 uppercase tracking-widest">Online</p>
+                  <p className="text-[9px] font-bold text-stone-400 uppercase tracking-widest">Online</p>
                 </div>
               </div>
             )}
           </div>
         </aside>
 
-        {/* Sidebar Toggle Arrow — fixed on the divider */}
+        {/* Sidebar Toggle — chevron on the right edge of sidebar, below header */}
         <button
           onClick={() => setIsSidebarOpen(!isSidebarOpen)}
           className={`
-            hidden lg:flex fixed top-1/2 -translate-y-1/2 z-[61] items-center justify-center
-            w-6 h-12 bg-stone-950 border border-stone-800 rounded-r-xl
-            text-stone-500 hover:text-white hover:bg-stone-900 transition-all duration-300 shadow-lg
-            ${isSidebarOpen ? 'left-72' : 'left-20'}
+            hidden lg:flex fixed top-[calc(50vh+2.5rem)] -translate-y-1/2 z-[61]
+            items-center justify-center w-5 h-10
+            bg-white border border-stone-200 rounded-r-lg
+            text-stone-400 hover:text-[#003366] hover:border-[#003366]/30
+            transition-all duration-300 shadow-sm hover:shadow-md
+            ${isSidebarOpen ? 'left-64' : 'left-[4.5rem]'}
           `}
-          title={isSidebarOpen ? 'Fechar menu' : 'Abrir menu'}
+          title={isSidebarOpen ? 'Recolher menu' : 'Expandir menu'}
         >
-          <ChevronLeft size={14} className={`transition-transform duration-300 ${!isSidebarOpen && 'rotate-180'}`} />
+          <ChevronLeft size={12} className={`transition-transform duration-300 ${!isSidebarOpen && 'rotate-180'}`} />
         </button>
 
         {/* Main Content */}
         <main 
           className={`
             flex-1 overflow-y-auto transition-all duration-300
-            ${isSidebarOpen ? 'lg:pl-72' : 'lg:pl-20'}
+            ${isSidebarOpen ? 'lg:ml-64' : 'lg:ml-[4.5rem]'}
             p-4 md:p-8
           `}
         >
@@ -565,35 +574,46 @@ export default function App() {
 
 // --- Sub-components ---
 
-function SidebarItem({ icon, label, active, onClick, collapsed }: { icon: React.ReactNode, label: string, active?: boolean, onClick: () => void, collapsed?: boolean }) {
-  const isMobile = window.innerWidth < 1024;
-  const showLabel = !collapsed || isMobile;
+function SidebarItem({ icon, label, sublabel, active, onClick, collapsed }: { 
+  icon: React.ReactNode, label: string, sublabel?: string, active?: boolean, onClick: () => void, collapsed?: boolean 
+}) {
+  const showLabel = !collapsed;
 
   return (
     <button 
       onClick={onClick}
       className={`
-        w-full flex items-center gap-4 p-4 rounded-2xl transition-all relative overflow-hidden group
+        w-full flex items-center gap-3 rounded-xl transition-all duration-200 relative group
+        ${showLabel ? 'px-3 py-3' : 'px-0 py-3 justify-center'}
         ${active 
-          ? 'bg-blue-600 text-white shadow-lg shadow-blue-900/30' 
-          : 'text-stone-500 hover:text-white hover:bg-white/5'}
-        ${!showLabel ? 'justify-center' : 'justify-start'}
+          ? 'bg-blue-50 text-[#003366]' 
+          : 'text-stone-500 hover:text-stone-900 hover:bg-stone-50'}
       `}
       title={!showLabel ? label : ''}
     >
-      <div className={`transition-transform duration-300 ${active ? 'scale-110' : 'group-hover:scale-110'}`}>
-        {icon}
-      </div>
-      {showLabel && (
-        <span className="text-[10px] font-black uppercase tracking-[0.2em] whitespace-nowrap animate-in fade-in slide-in-from-left-2 duration-300">
-          {label}
-        </span>
-      )}
+      {/* Active indicator bar */}
       {active && (
         <motion.div 
           layoutId="activeTab"
-          className="absolute left-0 w-1 h-6 bg-white rounded-full ml-1"
+          className="absolute left-0 top-2 bottom-2 w-1 bg-[#003366] rounded-full"
         />
+      )}
+      
+      <div className={`shrink-0 transition-all duration-200 ${active ? 'text-[#003366]' : ''} ${showLabel ? 'ml-2' : ''}`}>
+        {icon}
+      </div>
+
+      {showLabel && (
+        <div className="flex flex-col items-start min-w-0 animate-in fade-in slide-in-from-left-2 duration-200">
+          <span className="text-[11px] font-black uppercase tracking-[0.15em] whitespace-nowrap leading-tight">
+            {label}
+          </span>
+          {sublabel && (
+            <span className="text-[9px] font-medium text-stone-400 uppercase tracking-widest whitespace-nowrap">
+              {sublabel}
+            </span>
+          )}
+        </div>
       )}
     </button>
   );
