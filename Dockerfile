@@ -3,6 +3,7 @@ FROM node:20-slim AS builder
 WORKDIR /app
 COPY package*.json ./
 RUN npm install
+RUN apt-get update && apt-get install -y openssl
 COPY . .
 RUN npx prisma generate
 RUN npm run build
@@ -23,8 +24,9 @@ COPY tsconfig.json ./
 # For simplicity in this env, we'll use tsx.
 RUN npm install -g tsx
 
-# Puppeteer dependencies for Linux
+# Puppeteer and Prisma dependencies for Linux
 RUN apt-get update && apt-get install -y \
+    openssl \
     ca-certificates \
     fonts-liberation \
     libasound2 \
