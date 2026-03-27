@@ -1204,7 +1204,7 @@ function CadastroView({
 
             <div className={`hidden sm:block border-2 border-dashed border-stone-200 rounded-[2rem] bg-stone-50/30 transition-all hover:border-stone-300 relative`}>
               <SignatureCanvas 
-                ref={signatureRef}
+                ref={sigCanvas}
                 penColor="black"
                 canvasProps={{ 
                   className: 'w-full h-full cursor-crosshair',
