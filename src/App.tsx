@@ -294,25 +294,22 @@ export default function App() {
 
       {/* Header */}
       <header className="no-print h-20 bg-white border-b border-stone-100 px-6 lg:px-10 flex items-center justify-between shrink-0 z-50 shadow-sm relative">
-        <div className="flex items-center gap-8">
-          <button 
-            onClick={() => setIsSidebarOpen(!isSidebarOpen)}
-            className="p-3 hover:bg-stone-50 rounded-2xl transition-all active:scale-95 text-stone-400 hover:text-stone-900"
-          >
-            {/* Toggle icon based on state if needed, or keep Menu */}
-            <Menu size={24} />
-          </button>
-          
-          <div className="flex items-center gap-6">
+          <div className="flex items-center gap-4">
+            <button 
+              onClick={() => setIsSidebarOpen(!isSidebarOpen)}
+              className="p-2.5 hover:bg-stone-100 rounded-xl transition-all active:scale-95 text-stone-400 hover:text-stone-900"
+            >
+              <Menu size={22} />
+            </button>
+            
             <div className="text-stone-900 transition-transform hover:scale-105 cursor-pointer flex items-center justify-center">
-              <BrandLogo size="sm" className="brightness-0" />
+              <BrandLogo size="md" className="brightness-0" />
             </div>
-            <div className="w-[1px] h-8 bg-stone-200 hidden lg:block" />
-            <h2 className="text-base lg:text-lg font-black tracking-tighter uppercase hidden sm:block">
+            <div className="w-[1px] h-10 bg-stone-200 hidden lg:block" />
+            <h2 className="text-lg lg:text-xl font-black tracking-tighter uppercase hidden sm:block">
               Expedição <span className="text-[#003366]">CTDI</span>
             </h2>
           </div>
-        </div>
         
         <div className="flex items-center gap-6">
           <div className="hidden md:flex flex-col items-end">
@@ -396,30 +393,24 @@ export default function App() {
             transition-all duration-300 ease-in-out flex flex-col border-r border-stone-800
             ${isSidebarOpen 
               ? 'w-72 translate-x-0 shadow-2xl' 
-              : 'w-20 -translate-x-full lg:translate-x-0'
+              : 'w-0 lg:w-20 -translate-x-full lg:translate-x-0'
             }
-            no-print
+            no-print overflow-hidden
           `}
         >
           <div className={`flex items-center justify-between p-6 pb-0 ${!isSidebarOpen && 'lg:justify-center'}`}>
             {isSidebarOpen && (
-              <p className="text-[10px] font-black text-stone-500 uppercase tracking-[0.2em] animate-in fade-in duration-500">Menu Principal</p>
+              <p className="text-[10px] font-black text-stone-500 uppercase tracking-[0.2em] animate-in fade-in duration-500 whitespace-nowrap">Menu Principal</p>
             )}
-            <button 
-              onClick={() => setIsSidebarOpen(false)}
-              className="lg:hidden p-2 hover:bg-white/10 rounded-xl text-stone-500"
-            >
-              <Plus size={24} className="rotate-45" />
-            </button>
           </div>
 
-          <div className={`flex-1 py-10 px-4 space-y-3 ${!isSidebarOpen && 'lg:items-center'}`}>
+          <div className={`flex-1 py-10 px-4 space-y-3`}>
             <SidebarItem 
               icon={<PlusCircle size={22} />} 
               label="Novo Cadastro" 
               active={view === 'cadastro'} 
               collapsed={!isSidebarOpen}
-              onClick={startNewCadastro}
+              onClick={() => { startNewCadastro(); if(window.innerWidth < 1024) setIsSidebarOpen(false); }}
             />
             <SidebarItem 
               icon={<ClipboardList size={22} />} 
@@ -430,8 +421,8 @@ export default function App() {
             />
           </div>
 
-          <div className={`p-6 border-t border-stone-800 bg-black/20 flex items-center gap-4 transition-all ${!isSidebarOpen && 'lg:justify-center lg:px-0'}`}>
-            <div className={`w-12 h-12 shrink-0 rounded-2xl bg-blue-600 flex items-center justify-center text-white text-lg font-black shadow-lg shadow-blue-900/40`}>
+          <div className={`p-4 border-t border-stone-800 bg-black/20 flex items-center gap-4 transition-all ${!isSidebarOpen && 'justify-center px-0'}`}>
+            <div className={`w-11 h-11 shrink-0 rounded-xl bg-blue-600 flex items-center justify-center text-white text-base font-black shadow-lg shadow-blue-900/40`}>
               {user.name[0].toUpperCase()}
             </div>
             {isSidebarOpen && (
@@ -445,6 +436,20 @@ export default function App() {
             )}
           </div>
         </aside>
+
+        {/* Sidebar Toggle Arrow — fixed on the divider */}
+        <button
+          onClick={() => setIsSidebarOpen(!isSidebarOpen)}
+          className={`
+            hidden lg:flex fixed top-1/2 -translate-y-1/2 z-[61] items-center justify-center
+            w-6 h-12 bg-stone-950 border border-stone-800 rounded-r-xl
+            text-stone-500 hover:text-white hover:bg-stone-900 transition-all duration-300 shadow-lg
+            ${isSidebarOpen ? 'left-72' : 'left-20'}
+          `}
+          title={isSidebarOpen ? 'Fechar menu' : 'Abrir menu'}
+        >
+          <ChevronLeft size={14} className={`transition-transform duration-300 ${!isSidebarOpen && 'rotate-180'}`} />
+        </button>
 
         {/* Main Content */}
         <main 
