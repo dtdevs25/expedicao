@@ -71,7 +71,7 @@ export default function App() {
   const [user, setUser] = useState<{ name: string, token: string, mustChangePassword?: boolean } | null>(null);
   const [isInitializing, setIsInitializing] = useState<boolean>(true);
   const [view, setView] = useState<'cadastro' | 'consulta' | 'preview'>('cadastro');
-  const [isSidebarOpen, setIsSidebarOpen] = useState(false); // Changed initial state to false for mobile-first
+  const [isSidebarOpen, setIsSidebarOpen] = useState(window.innerWidth >= 1024); // Open by default on desktop
   const [records, setRecords] = useState<RegistroExpedicao[]>([]);
   const [formData, setFormData] = useState<RegistroExpedicao>(INITIAL_FORM_DATA);
   const [selectedRecord, setSelectedRecord] = useState<RegistroExpedicao | null>(null);
