@@ -62,7 +62,6 @@ const BrandLogo = ({ size = "md", className = "" }: { size?: "sm" | "md" | "lg",
 
 export default function App() {
   const [user, setUser] = useState<{ name: string, token: string, mustChangePassword?: boolean } | null>(null);
-  const [setupRequired, setSetupRequired] = useState<boolean>(false);
   const [isInitializing, setIsInitializing] = useState<boolean>(true);
   const [view, setView] = useState<'cadastro' | 'consulta' | 'preview'>('cadastro');
   const [isSidebarOpen, setIsSidebarOpen] = useState(true);
@@ -74,25 +73,46 @@ export default function App() {
   const [confirmDelete, setConfirmDelete] = useState<string | null>(null);
 
   useEffect(() => {
-    const checkSetupAndAuth = async () => {
+    const initAuth = async () => {
       try {
-        const setupRes = await fetch('/api/auth/check-setup');
-        const setupData = await setupRes.json();
-        setSetupRequired(setupData.setupRequired);
-
         const savedUser = localStorage.getItem('ctdi_user');
         if (savedUser) {
           const parsed = JSON.parse(savedUser);
-          setUser(parsed);
-          fetchRecords(parsed.token);
+          // Validate token is still good
+          const res = await fetch('/api/records', {
+            headers: { 'Authorization': `Bearer ${parsed.token}` }
+          });
+          if (res.status === 401) {
+            localStorage.removeItem('ctdi_user');
+          } else {
+            setUser(parsed);
+            if (!parsed.mustChangePassword) {
+              const data = await res.json();
+              const mappedData = data.map((r: any) => ({
+                ...r,
+                nfs: r.notasFiscais.map((nf: any) => ({
+                  id: nf.id,
+                  numero: nf.numero,
+                  expedicaoId: nf.expedicaoRefId
+                })),
+                assinaturaDigital: {
+                  nome: r.nomeAssinatura,
+                  dataHora: r.dataHoraAssinatura,
+                  codigoRastreabilidade: r.codigoRastreabilidade
+                }
+              }));
+              setRecords(mappedData);
+            }
+          }
         }
       } catch (e) {
         console.error('Erro na inicialização:', e);
+        localStorage.removeItem('ctdi_user');
       } finally {
         setIsInitializing(false);
       }
     };
-    checkSetupAndAuth();
+    initAuth();
   }, []);
 
   const fetchRecords = async (token: string) => {
@@ -216,14 +236,6 @@ export default function App() {
         <BrandLogo size="lg" className="opacity-80 animate-pulse" />
       </div>
     );
-  }
-
-  if (setupRequired) {
-    return <SetupView onComplete={(userData: any) => {
-      setSetupRequired(false);
-      setUser(userData);
-      localStorage.setItem('ctdi_user', JSON.stringify(userData));
-    }} />;
   }
 
   if (!user) {

@@ -58,35 +58,6 @@ const authMiddleware = (req: any, res: any, next: any) => {
 
 // SMTP Config
 
-// Auth Routes
-app.get('/api/auth/check-setup', async (req, res) => {
-  try {
-    const userCount = await prisma.user.count();
-    res.json({ setupRequired: userCount === 0 });
-  } catch (error) {
-    res.status(500).json({ error: 'Erro ao verificar setup' });
-  }
-});
-
-app.post('/api/auth/setup', async (req, res) => {
-  const { password, name, email } = req.body;
-  try {
-    const userCount = await prisma.user.count();
-    if (userCount > 0) return res.status(400).json({ error: 'Setup já realizado.' });
-
-    const hashedPassword = await bcrypt.hash(password, 10);
-    const user = await prisma.user.create({
-      data: { username: email, password: hashedPassword, name, email, role: 'ADMIN' }
-    });
-    
-    const token = jwt.sign({ id: user.id, email: user.email }, JWT_SECRET, { expiresIn: '7d' });
-    res.json({ token, user: { name: user.name, email: user.email, mustChangePassword: user.mustChangePassword } });
-  } catch (error) {
-    console.error('Setup error:', error);
-    res.status(500).json({ error: 'Erro no setup inicial' });
-  }
-});
-
 app.post('/api/auth/login', async (req, res) => {
   const { email, password } = req.body;
   try {
