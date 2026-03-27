@@ -69,18 +69,18 @@ app.get('/api/auth/check-setup', async (req, res) => {
 });
 
 app.post('/api/auth/setup', async (req, res) => {
-  const { username, password, name, email } = req.body;
+  const { password, name, email } = req.body;
   try {
     const userCount = await prisma.user.count();
     if (userCount > 0) return res.status(400).json({ error: 'Setup já realizado.' });
 
     const hashedPassword = await bcrypt.hash(password, 10);
     const user = await prisma.user.create({
-      data: { username, password: hashedPassword, name, email, role: 'ADMIN' }
+      data: { username: email, password: hashedPassword, name, email, role: 'ADMIN' }
     });
     
-    const token = jwt.sign({ id: user.id, username: user.username }, JWT_SECRET, { expiresIn: '7d' });
-    res.json({ token, user: { name: user.name, username: user.username, mustChangePassword: user.mustChangePassword } });
+    const token = jwt.sign({ id: user.id, email: user.email }, JWT_SECRET, { expiresIn: '7d' });
+    res.json({ token, user: { name: user.name, email: user.email, mustChangePassword: user.mustChangePassword } });
   } catch (error) {
     console.error('Setup error:', error);
     res.status(500).json({ error: 'Erro no setup inicial' });
@@ -88,16 +88,16 @@ app.post('/api/auth/setup', async (req, res) => {
 });
 
 app.post('/api/auth/login', async (req, res) => {
-  const { username, password } = req.body;
+  const { email, password } = req.body;
   try {
-    const user = await prisma.user.findUnique({ where: { username } });
+    const user = await prisma.user.findUnique({ where: { email } });
     if (!user) return res.status(401).json({ error: 'Credenciais inválidas' });
 
     const validPassword = await bcrypt.compare(password, user.password);
     if (!validPassword) return res.status(401).json({ error: 'Credenciais inválidas' });
 
-    const token = jwt.sign({ id: user.id, username: user.username }, JWT_SECRET, { expiresIn: '7d' });
-    res.json({ token, user: { name: user.name, username: user.username, mustChangePassword: user.mustChangePassword } });
+    const token = jwt.sign({ id: user.id, email: user.email }, JWT_SECRET, { expiresIn: '7d' });
+    res.json({ token, user: { name: user.name, email: user.email, mustChangePassword: user.mustChangePassword } });
   } catch (error) {
     console.error('Login error:', error);
     res.status(500).json({ error: 'Erro no login' });

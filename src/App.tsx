@@ -487,7 +487,7 @@ function SidebarItem({ icon, label, active, collapsed, onClick }: any) {
 }
 
 function LoginView({ onLogin }: { onLogin: (data: any) => void }) {
-  const [username, setUsername] = useState('');
+  const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
   const [emailForReset, setEmailForReset] = useState('');
   const [isResetMode, setIsResetMode] = useState(false);
@@ -503,7 +503,7 @@ function LoginView({ onLogin }: { onLogin: (data: any) => void }) {
       const res = await fetch('/api/auth/login', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ username, password })
+        body: JSON.stringify({ email, password })
       });
       const data = await res.json();
       if (res.ok) {
@@ -605,12 +605,12 @@ function LoginView({ onLogin }: { onLogin: (data: any) => void }) {
             )}
             <div className="space-y-4">
               <div className="relative">
-                <User className="absolute left-4 top-1/2 -translate-y-1/2 text-stone-400" size={18} />
+                <FileText className="absolute left-4 top-1/2 -translate-y-1/2 text-stone-400" size={18} />
                 <input
-                  type="text"
-                  placeholder="Usuário"
-                  value={username}
-                  onChange={(e) => setUsername(e.target.value)}
+                  type="email"
+                  placeholder="Seu E-mail"
+                  value={email}
+                  onChange={(e) => setEmail(e.target.value)}
                   className="w-full bg-stone-50 border-none rounded-2xl py-4 pl-12 pr-4 text-sm focus:ring-2 focus:ring-stone-900 transition-all"
                   required
                 />
@@ -653,7 +653,6 @@ function LoginView({ onLogin }: { onLogin: (data: any) => void }) {
 }
 
 function SetupView({ onComplete }: { onComplete: (data: any) => void }) {
-  const [username, setUsername] = useState('');
   const [password, setPassword] = useState('');
   const [email, setEmail] = useState('');
   const [name, setName] = useState('');
@@ -668,7 +667,7 @@ function SetupView({ onComplete }: { onComplete: (data: any) => void }) {
       const res = await fetch('/api/auth/setup', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ username, password, name, email })
+        body: JSON.stringify({ username: email, password, name, email })
       });
       const data = await res.json();
       if (res.ok) {
@@ -700,9 +699,8 @@ function SetupView({ onComplete }: { onComplete: (data: any) => void }) {
           {error && <div className="text-red-600 bg-red-50 p-4 rounded-xl text-xs font-bold uppercase">{error}</div>}
           <div className="space-y-4">
             <InputField label="Nome Completo" value={name} onChange={setName} icon={<User size={18} />} />
-            <InputField label="E-mail de Recuperação" value={email} onChange={setEmail} icon={<FileText size={18} />} />
-            <InputField label="Usuário de Acesso" value={username} onChange={setUsername} icon={<LayoutDashboard size={18} />} />
-            <InputField label="Senha Mestra" value={password} onChange={setPassword} icon={<Lock size={18} />} type="password" />
+            <InputField label="Seu E-mail" value={email} onChange={setEmail} icon={<FileText size={18} />} />
+            <InputField label="Senha" value={password} onChange={setPassword} icon={<Lock size={18} />} type="password" />
           </div>
           
           <button
