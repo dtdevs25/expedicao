@@ -68,5 +68,5 @@ RUN apt-get update && apt-get install -y \
 
 EXPOSE 3000
 
-# Run migrations and start server
-CMD npx prisma migrate deploy && tsx server.ts
+# Run sync and start server
+CMD npx prisma db push --accept-data-loss && tsx server.ts
