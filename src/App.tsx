@@ -63,6 +63,7 @@ const BrandLogo = ({ size = "md", className = "" }: { size?: "sm" | "md" | "lg",
 export default function App() {
   const [user, setUser] = useState<{ name: string, token: string, mustChangePassword?: boolean } | null>(null);
   const [setupRequired, setSetupRequired] = useState<boolean>(false);
+  const [isInitializing, setIsInitializing] = useState<boolean>(true);
   const [view, setView] = useState<'cadastro' | 'consulta' | 'preview'>('cadastro');
   const [isSidebarOpen, setIsSidebarOpen] = useState(true);
   const [records, setRecords] = useState<RegistroExpedicao[]>([]);
@@ -87,6 +88,8 @@ export default function App() {
         }
       } catch (e) {
         console.error('Erro na inicialização:', e);
+      } finally {
+        setIsInitializing(false);
       }
     };
     checkSetupAndAuth();
@@ -206,6 +209,14 @@ export default function App() {
     setFormData(record);
     setView('cadastro');
   };
+
+  if (isInitializing) {
+    return (
+      <div className="min-h-screen bg-stone-900 flex items-center justify-center">
+        <BrandLogo size="lg" className="opacity-80 animate-pulse" />
+      </div>
+    );
+  }
 
   if (setupRequired) {
     return <SetupView onComplete={(userData: any) => {
