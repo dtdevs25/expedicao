@@ -21,22 +21,18 @@ const NATUREZAS: NaturezaOperacao[] = [
 ];
 
 const INITIAL_FORM_DATA: RegistroExpedicao = {
-  responsavel: 'Akim de Oliveira',
-  dataSaida: new Date().toLocaleDateString('pt-BR') + ' ' + new Date().toLocaleTimeString('pt-BR', { hour: '2-digit', minute: '2-digit' }),
-  cliente: 'Cielo S.A.',
-  destino: 'FNC Barueri',
-  nfs: [
-    { id: '1', numero: '142171', expedicaoId: 'EXP-9921' },
-    { id: '2', numero: '142056', expedicaoId: 'EXP-9922' },
-    { id: '3', numero: '142071', expedicaoId: 'EXP-9923' },
-  ],
+  responsavel: '',
+  dataSaida: '',
+  cliente: '',
+  destino: '',
+  nfs: [],
   natureza: 'VENDA',
-  volumes: '85',
-  transportadora: 'FNC Logística',
-  motorista: 'Lourival Dias',
-  rgCpf: '12.345.678-9',
-  placaVeiculo: 'RKE-0G55',
-  ajudante: 'Sem ajudante',
+  volumes: '',
+  transportadora: '',
+  motorista: '',
+  rgCpf: '',
+  placaVeiculo: '',
+  ajudante: '',
   signatureImage: undefined,
   assinaturaDigital: {
     nome: '',
@@ -967,32 +963,32 @@ function CadastroView({
 
       <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
         {/* Card: Dados da Expedição */}
-        <div className="bg-white p-8 rounded-[2rem] shadow-sm border border-stone-100 space-y-8">
-          <div className="flex items-center gap-4 text-stone-900">
-            <div className="p-3 bg-stone-100 rounded-2xl">
-              <ClipboardList size={24} />
+        <div className="bg-white rounded-[2rem] shadow-sm border border-stone-100 overflow-hidden">
+          <div className="bg-stone-900 p-6 flex items-center gap-4 text-white">
+            <div className="p-2.5 bg-white/10 rounded-xl">
+              <ClipboardList size={22} />
             </div>
-            <h2 className="text-lg font-black uppercase tracking-tighter">Dados da Expedição</h2>
+            <h2 className="text-base font-black uppercase tracking-tighter">Dados da Expedição</h2>
           </div>
           
-          <div className="space-y-5">
+          <div className="p-8 space-y-5">
             <InputField label="Responsável Expedição" value={data.responsavel} onChange={(v) => setData((prev: any) => ({ ...prev, responsavel: v }))} />
-            <InputField label="Data/Hora Saída" value={data.dataSaida} onChange={(v) => setData((prev: any) => ({ ...prev, dataSaida: v }))} />
+            <InputField label="Data/Hora Saída" value={data.dataSaida} onChange={(v) => setData((prev: any) => ({ ...prev, dataSaida: v }))} placeholder="DD/MM/AAAA HH:MM" />
             <InputField label="Cliente" value={data.cliente} onChange={(v) => setData((prev: any) => ({ ...prev, cliente: v }))} />
             <InputField label="Destino" value={data.destino} onChange={(v) => setData((prev: any) => ({ ...prev, destino: v }))} />
           </div>
         </div>
 
         {/* Card: Logística */}
-        <div className="bg-white p-8 rounded-[2rem] shadow-sm border border-stone-100 space-y-8">
-          <div className="flex items-center gap-4 text-stone-900">
-            <div className="p-3 bg-stone-100 rounded-2xl">
-              <Truck size={24} />
+        <div className="bg-white rounded-[2rem] shadow-sm border border-stone-100 overflow-hidden">
+          <div className="bg-stone-900 p-6 flex items-center gap-4 text-white">
+            <div className="p-2.5 bg-white/10 rounded-xl">
+              <Truck size={22} />
             </div>
-            <h2 className="text-lg font-black uppercase tracking-tighter">Logística</h2>
+            <h2 className="text-base font-black uppercase tracking-tighter">Logística</h2>
           </div>
           
-          <div className="space-y-5">
+          <div className="p-8 space-y-5">
             <div className="grid grid-cols-1 sm:grid-cols-2 gap-5">
               <InputField label="Volumes" value={data.volumes} onChange={(v) => setData((prev: any) => ({ ...prev, volumes: v }))} />
               <InputField label="Placa do Veículo" value={data.placaVeiculo} onChange={(v) => setData((prev: any) => ({ ...prev, placaVeiculo: v }))} />
@@ -1007,151 +1003,157 @@ function CadastroView({
         </div>
 
         {/* Card: Notas Fiscais */}
-        <div className="md:col-span-2 bg-white p-8 rounded-[2rem] shadow-sm border border-stone-100 space-y-8">
-          <div className="flex items-center justify-between">
-            <div className="flex items-center gap-4 text-stone-900">
-              <div className="p-3 bg-stone-100 rounded-2xl">
-                <FileText size={24} />
+        <div className="md:col-span-2 bg-white rounded-[2rem] shadow-sm border border-stone-100 overflow-hidden">
+          <div className="bg-stone-900 p-6 flex items-center justify-between text-white">
+            <div className="flex items-center gap-4">
+              <div className="p-2.5 bg-white/10 rounded-xl">
+                <FileText size={22} />
               </div>
-              <h2 className="text-lg font-black uppercase tracking-tighter">Notas Fiscais</h2>
+              <h2 className="text-base font-black uppercase tracking-tighter">Notas Fiscais</h2>
             </div>
             <button 
               onClick={addNF}
-              className="flex items-center gap-2 bg-stone-900 text-white px-5 py-2.5 rounded-xl hover:bg-stone-800 transition-all text-[10px] font-black uppercase tracking-widest"
+              className="flex items-center gap-2 bg-white text-stone-900 px-5 py-2.5 rounded-xl hover:bg-stone-100 transition-all text-[10px] font-black uppercase tracking-widest shadow-sm"
             >
               <Plus size={14} /> Adicionar NF
             </button>
           </div>
 
-          <div className="space-y-3">
-            {/* List Header */}
-            {data.nfs.length > 0 && (
-              <div className="grid grid-cols-1 sm:grid-cols-2 gap-6 pr-12 px-4 hidden sm:grid">
-                <span className="text-[10px] font-black text-stone-400 uppercase tracking-widest">Nº da NF</span>
-                <span className="text-[10px] font-black text-stone-400 uppercase tracking-widest">ID Expedição</span>
-              </div>
-            )}
-
-            {data.nfs.map((nf: any) => (
-              <div key={nf.id} className="flex items-center gap-4 group">
-                <div className="flex-1 grid grid-cols-1 sm:grid-cols-2 gap-4 bg-stone-50/50 p-3 rounded-2xl border border-stone-100 group-hover:border-stone-200 transition-all">
-                  <div className="sm:hidden">
-                    <InputField label="Nº da NF" value={nf.numero} onChange={(v) => updateNF(nf.id, 'numero', v)} />
-                  </div>
-                  <div className="hidden sm:block">
-                    <input
-                      type="text"
-                      value={nf.numero}
-                      placeholder="000.000.000"
-                      onChange={(e) => updateNF(nf.id, 'numero', e.target.value)}
-                      className={`w-full bg-white border rounded-xl py-2.5 px-4 text-xs focus:ring-2 focus:ring-stone-900 transition-all shadow-sm ${
-                        nf.numero.trim() === '' ? 'border-amber-200 bg-amber-50/30' : 'border-stone-200'
-                      }`}
-                    />
-                  </div>
-
-                  <div className="sm:hidden">
-                    <InputField label="ID Expedição" value={nf.expedicaoId} onChange={(v) => updateNF(nf.id, 'expedicaoId', v)} />
-                  </div>
-                  <div className="hidden sm:block">
-                    <input
-                      type="text"
-                      value={nf.expedicaoId}
-                      placeholder="EXP-0000"
-                      onChange={(e) => updateNF(nf.id, 'expedicaoId', e.target.value)}
-                      className={`w-full bg-white border rounded-xl py-2.5 px-4 text-xs focus:ring-2 focus:ring-stone-900 transition-all shadow-sm ${
-                        nf.expedicaoId.trim() === '' ? 'border-amber-200 bg-amber-50/30' : 'border-stone-200'
-                      }`}
-                    />
-                  </div>
+          <div className="p-8 space-y-8">
+            <div className="space-y-3">
+              {/* List Header */}
+              {data.nfs.length > 0 && (
+                <div className="grid grid-cols-1 sm:grid-cols-2 gap-6 pr-12 px-4 hidden sm:grid">
+                  <span className="text-[10px] font-black text-stone-400 uppercase tracking-widest">Nº da NF</span>
+                  <span className="text-[10px] font-black text-stone-400 uppercase tracking-widest">ID Expedição</span>
                 </div>
-                <button 
-                  onClick={() => removeNF(nf.id)}
-                  className="bg-white text-stone-300 hover:text-red-500 p-3 rounded-xl shadow-sm border border-stone-100 hover:border-red-100 transition-all"
-                  title="Remover NF"
-                >
-                  <Trash2 size={18} />
-                </button>
-              </div>
-            ))}
+              )}
 
-            {data.nfs.length === 0 && (
-              <div className="py-12 text-center border-2 border-dashed border-stone-100 rounded-[2rem] text-stone-300 font-bold text-sm uppercase tracking-widest bg-stone-50/30">
-                Nenhuma Nota Fiscal adicionada
-              </div>
-            )}
+              {data.nfs.map((nf: any) => (
+                <div key={nf.id} className="flex items-center gap-4 group">
+                  <div className="flex-1 grid grid-cols-1 sm:grid-cols-2 gap-4 bg-stone-50/50 p-3 rounded-2xl border border-stone-100 group-hover:border-stone-200 transition-all">
+                    <div className="sm:hidden">
+                      <InputField label="Nº da NF" value={nf.numero} onChange={(v) => updateNF(nf.id, 'numero', v)} />
+                    </div>
+                    <div className="hidden sm:block">
+                      <input
+                        type="text"
+                        value={nf.numero}
+                        placeholder="000.000.000"
+                        onChange={(e) => updateNF(nf.id, 'numero', e.target.value)}
+                        className={`w-full bg-white border rounded-xl py-2.5 px-4 text-xs focus:ring-2 focus:ring-stone-900 transition-all shadow-sm ${
+                          nf.numero.trim() === '' ? 'border-amber-200 bg-amber-50/30' : 'border-stone-200'
+                        }`}
+                      />
+                    </div>
+
+                    <div className="sm:hidden">
+                      <InputField label="ID Expedição" value={nf.expedicaoId} onChange={(v) => updateNF(nf.id, 'expedicaoId', v)} />
+                    </div>
+                    <div className="hidden sm:block">
+                      <input
+                        type="text"
+                        value={nf.expedicaoId}
+                        placeholder="EXP-0000"
+                        onChange={(e) => updateNF(nf.id, 'expedicaoId', e.target.value)}
+                        className={`w-full bg-white border rounded-xl py-2.5 px-4 text-xs focus:ring-2 focus:ring-stone-900 transition-all shadow-sm ${
+                          nf.expedicaoId.trim() === '' ? 'border-amber-200 bg-amber-50/30' : 'border-stone-200'
+                        }`}
+                      />
+                    </div>
+                  </div>
+                  <button 
+                    onClick={() => removeNF(nf.id)}
+                    className="bg-white text-stone-300 hover:text-red-500 p-3 rounded-xl shadow-sm border border-stone-100 hover:border-red-100 transition-all"
+                    title="Remover NF"
+                  >
+                    <Trash2 size={18} />
+                  </button>
+                </div>
+              ))}
+
+              {data.nfs.length === 0 && (
+                <div className="py-12 text-center border-2 border-dashed border-stone-100 rounded-[2rem] text-stone-300 font-bold text-sm uppercase tracking-widest bg-stone-50/30">
+                  Nenhuma Nota Fiscal adicionada
+                </div>
+              )}
+            </div>
           </div>
         </div>
 
         {/* Card: Natureza da Operação */}
-        <div className="md:col-span-2 bg-white p-8 rounded-[2rem] shadow-sm border border-stone-100 space-y-8">
-          <div className="flex items-center gap-4 text-stone-900">
-            <div className="p-3 bg-stone-100 rounded-2xl">
-              <Settings size={24} />
+        <div className="md:col-span-2 bg-white rounded-[2rem] shadow-sm border border-stone-100 overflow-hidden">
+          <div className="bg-stone-900 p-6 flex items-center gap-4 text-white">
+            <div className="p-2.5 bg-white/10 rounded-xl">
+              <Settings size={22} />
             </div>
-            <h2 className="text-lg font-black uppercase tracking-tighter">Natureza da Operação</h2>
+            <h2 className="text-base font-black uppercase tracking-tighter">Natureza da Operação</h2>
           </div>
 
-          <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-4 gap-2">
-            {NATUREZAS.map(n => {
-              const Icon = natureIcons[n] || Settings;
-              return (
-                <button
-                  key={n}
-                  onClick={() => setData((prev: any) => ({ ...prev, natureza: n }))}
-                  className={`flex items-center gap-3 p-3 rounded-xl transition-all border text-left group ${
-                    data.natureza === n 
-                      ? 'bg-stone-900 border-stone-900 text-white shadow-md' 
-                      : 'bg-white border-stone-100 text-stone-600 hover:border-stone-300 hover:bg-stone-50'
-                  }`}
-                >
-                  <div className={`p-1.5 rounded-lg transition-colors ${
-                    data.natureza === n ? 'bg-white/10 text-white' : 'bg-stone-100 text-stone-400 group-hover:bg-stone-200'
-                  }`}>
-                    <Icon size={14} />
-                  </div>
-                  <span className="text-[9px] font-black uppercase tracking-tight leading-tight flex-1">{n}</span>
-                </button>
-              );
-            })}
+          <div className="p-8 space-y-8">
+            <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-4 gap-2">
+              {NATUREZAS.map(n => {
+                const Icon = natureIcons[n] || Settings;
+                return (
+                  <button
+                    key={n}
+                    onClick={() => setData((prev: any) => ({ ...prev, natureza: n }))}
+                    className={`flex items-center gap-3 p-3 rounded-xl transition-all border text-left group ${
+                      data.natureza === n 
+                        ? 'bg-stone-900 border-stone-900 text-white shadow-md' 
+                        : 'bg-white border-stone-100 text-stone-600 hover:border-stone-300 hover:bg-stone-50'
+                    }`}
+                  >
+                    <div className={`p-1.5 rounded-lg transition-colors ${
+                      data.natureza === n ? 'bg-white/10 text-white' : 'bg-stone-100 text-stone-400 group-hover:bg-stone-200'
+                    }`}>
+                      <Icon size={14} />
+                    </div>
+                    <span className="text-[9px] font-black uppercase tracking-tight leading-tight flex-1">{n}</span>
+                  </button>
+                );
+              })}
+            </div>
           </div>
         </div>
 
         {/* Card: Coleta de Assinatura */}
-        <div className="md:col-span-2 bg-white p-8 rounded-[2rem] shadow-sm border border-stone-100 space-y-8">
-          <div className="flex items-center justify-between">
-            <div className="flex items-center gap-4 text-stone-900">
-              <div className="p-3 bg-stone-100 rounded-2xl">
-                <PenTool size={24} />
+        <div className="md:col-span-2 bg-white rounded-[2rem] shadow-sm border border-stone-100 overflow-hidden">
+          <div className="bg-stone-900 p-6 flex items-center justify-between text-white">
+            <div className="flex items-center gap-4">
+              <div className="p-2.5 bg-white/10 rounded-xl">
+                <PenTool size={22} />
               </div>
-              <h2 className="text-lg font-black uppercase tracking-tighter">Coleta de Assinatura</h2>
+              <h2 className="text-base font-black uppercase tracking-tighter">Coleta de Assinatura</h2>
             </div>
             <button 
               onClick={clearSignature}
-              className="flex items-center gap-2 text-stone-400 hover:text-red-500 transition-colors text-[10px] font-black uppercase tracking-widest"
+              className="flex items-center gap-2 text-white/60 hover:text-white transition-colors text-[10px] font-black uppercase tracking-widest"
             >
               <Eraser size={14} /> Limpar Assinatura
             </button>
           </div>
 
-          <div className="border-2 border-dashed border-stone-200 rounded-3xl overflow-hidden bg-stone-50 h-48 relative touch-none">
-            <SignatureCanvas 
-              ref={sigCanvas}
-              penColor="black"
-              velocityFilterWeight={0.7}
-              minWidth={1.5}
-              maxWidth={3.5}
-              canvasProps={{ 
-                className: 'w-full h-full cursor-crosshair',
-                style: { display: 'block' }
-              }}
-              onEnd={saveSignature}
-            />
-            {!data.signatureImage && (
-              <div className="absolute inset-0 flex items-center justify-center pointer-events-none text-stone-300 text-[10px] font-black uppercase tracking-[0.2em]">
-                Assine aqui
-              </div>
-            )}
+          <div className="p-8 space-y-8">
+            <div className="border-2 border-dashed border-stone-200 rounded-3xl overflow-hidden bg-stone-50 h-48 relative touch-none">
+              <SignatureCanvas 
+                ref={sigCanvas}
+                penColor="black"
+                velocityFilterWeight={0.7}
+                minWidth={1.5}
+                maxWidth={3.5}
+                canvasProps={{ 
+                  className: 'w-full h-full cursor-crosshair',
+                  style: { display: 'block' }
+                }}
+                onEnd={saveSignature}
+              />
+              {!data.signatureImage && (
+                <div className="absolute inset-0 flex items-center justify-center pointer-events-none text-stone-300 text-[10px] font-black uppercase tracking-[0.2em]">
+                  Assine aqui
+                </div>
+              )}
+            </div>
           </div>
         </div>
 
